@@ -8,7 +8,7 @@ PROG_BIN = $(BUILDDIR)/$(PROG).bin
 PROG_HEX = $(BUILDDIR)/$(PROG).hex
 FAKE_HEX = $(BUILDDIR)/rom.hex
 
-SRC = $(wildcard hdl/*.v) $(wildcard lib/z80/*.v)
+SRC = $(wildcard hdl/*.v) $(wildcard lib/fx68k/*.v)
 
 all: $(BUILDDIR)/toplevel.bit
 .PHONY: all
