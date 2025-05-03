@@ -1,25 +1,22 @@
 module ram #(
-  parameter MEM_INIT_FILE = "",
-  parameter DATA_WIDTH = 16,
   parameter DEPTH = 16384,
   parameter ADDRESS_WIDTH = $clog2(DEPTH)
 ) (
   input clk,
-  input cs,
   input we,
-  input [ADDRESS_WIDTH-1:0] addr,
-  input [DATA_WIDTH-1:0] din,
-  output reg [DATA_WIDTH-1:0] dout
+  input [1:0] mask,
+  input [ADDRESS_WIDTH-1:1] addr,
+  input [15:0] din,
+  output reg [15:0] dout
 );
 
-reg [DATA_WIDTH-1:0] ram[0:DEPTH-1];
-
-initial
-  if (MEM_INIT_FILE != "")
-    $readmemh(MEM_INIT_FILE, ram);
+reg [1:0][15:0] ram[0:DEPTH-1];
 
 always @(posedge clk) begin
-  if (cs && we) ram[addr] <= din;
+  if (we) begin
+    if (mask[0]) ram[addr][0] <= din[7:0];
+    if (mask[1]) ram[addr][1] <= din[15:8];
+  end
   dout <= ram[addr];
 end
 
