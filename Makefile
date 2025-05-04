@@ -2,8 +2,9 @@ DEVICE = 85k
 PIN_DEF = ulx3s_v20.lpf
 BUILDDIR = build
 
-PROG = uart
-PROG_ASM = rom/$(PROG).asm
+PROG = blink
+PROG_C = rom/$(PROG).c
+PROG_O = rom/$(PROG).o
 PROG_BIN = $(BUILDDIR)/$(PROG).bin
 PROG_HEX = $(BUILDDIR)/$(PROG).hex
 FAKE_HEX = $(BUILDDIR)/rom.hex
@@ -33,9 +34,11 @@ $(FAKE_HEX):
 	mkdir -p $(BUILDDIR)
 	ecpbram -w 8 -d 512 -g $@
 
-$(PROG_BIN): $(PROG_ASM)
+$(PROG_BIN): $(PROG_C)
 	mkdir -p $(BUILDDIR)
-	z80asm $< -I rom -o $@
+	m68k-linux-gnu-gcc -Wall -m68000 -msoft-float -c $(PROG_C)
+	m68k-linux-gnu-ld --defsym=_start=main -Ttext=0x2000 -Tdata=0x3000 -Tbss=0x4000 --section-start=.rodata=0x5000 $(PROG_O) `m68k-linux-gnu-gcc -m68000 -print-libgcc-file-name`
+	m68k-linux-gnu-objcopy -I elf32-m68k -O binary a.out demo.run
 
 $(PROG_HEX): $(PROG_BIN)
 	hexdump -v -e '/1 "%02x\n"' $< > $@

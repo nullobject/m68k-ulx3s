@@ -23,9 +23,7 @@ wire [7:0] acia_dout;
 wire rom_cs = !vma_n && cpu_addr[15:12] == 4'h0;
 wire ram_cs = !vma_n && cpu_addr[15:12] == 4'h1;
 wire led_cs = !vma_n && cpu_addr[7:0] == 8'h00;
-wire acia_ctrl_cs = !vma_n && cpu_addr[7:0] == 8'h80;
-wire acia_data_cs = !vma_n && cpu_addr[7:0] == 8'h81;
-wire acia_cs = acia_ctrl_cs || acia_data_cs;
+wire acia_cs = !vma_n && cpu_addr[7:0] == 8'h80;
 
 // decode CPU input data bus
 assign cpu_din = acia_cs ? {8'd0, acia_dout} : (ram_cs ? ram_dout : rom_dout);
@@ -143,7 +141,7 @@ acia uart (
   .cs(acia_cs),
   .e_clk(cpu_E),
   .rw_n(cpu_rw),
-  .rs(acia_data_cs),
+  .rs(cpu_addr[1]),
   .data_in(cpu_dout),
   .data_out(acia_dout),
   .txclk(baud),
