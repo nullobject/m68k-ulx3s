@@ -5,7 +5,7 @@ module ram #(
   input clk,
   input we,
   input [1:0] mask,
-  input [ADDRESS_WIDTH-1:1] addr,
+  input [ADDRESS_WIDTH-2:1] addr,
   input [15:0] din,
   output reg [15:0] dout
 );

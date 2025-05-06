@@ -5,7 +5,7 @@ module rom #(
   parameter ADDRESS_WIDTH = $clog2(DEPTH)
 ) (
   input clk,
-  input [ADDRESS_WIDTH-1:1] addr,
+  input [ADDRESS_WIDTH-2:1] addr,
   output reg [15:0] dout
 );
 

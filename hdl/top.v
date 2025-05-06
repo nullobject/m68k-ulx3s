@@ -9,35 +9,24 @@ module top (
 assign wifi_gpio0 = 1'b1;
 
 reg rst_n = 0;
-reg [7:0] baud_cnt = 0;
-reg baud;
 
 wire [23:1] cpu_addr;
 wire [15:0] cpu_dout;
 wire [15:0] cpu_din;
 wire [15:0] rom_dout;
 wire [15:0] ram_dout;
-wire [7:0] acia_dout;
 
 // chip select
 wire rom_cs = !vma_n && cpu_addr[15:12] == 4'h0;
 wire ram_cs = !vma_n && cpu_addr[15:12] == 4'h1;
-wire led_cs = !vma_n && cpu_addr[7:0] == 8'h00;
-wire acia_cs = !vma_n && cpu_addr[7:0] == 8'h80;
+wire led_cs = !vma_n && cpu_addr[15:12] == 4'h2;
 
 // decode CPU input data bus
-assign cpu_din = acia_cs ? {8'd0, acia_dout} : (ram_cs ? ram_dout : rom_dout);
+assign cpu_din = ram_cs ? ram_dout : rom_dout;
 
 // reset
 always @(posedge clk_25mhz) begin
   rst_n <= 1;
-end
-
-// 9600 baud clock
-always @(posedge clk_25mhz) begin
-  baud_cnt <= baud_cnt + 1;
-  baud <= baud_cnt > 81;
-  if (baud_cnt > 162) baud_cnt <= 0;
 end
 
 // LED port
@@ -118,7 +107,7 @@ rom #(
   .DEPTH(512)
 ) prog_rom (
   .clk(clk_25mhz),
-  .addr(cpu_addr[15:1]),
+  .addr(cpu_addr[8:1]),
   .dout(rom_dout)
 );
 
@@ -129,28 +118,9 @@ ram #(
   .clk(clk_25mhz),
   .we(!cpu_rw),
   .mask({!cpu_uds_n, !cpu_lds_n}),
-  .addr(cpu_addr[15:1]),
+  .addr(cpu_addr[11:1]),
   .din(cpu_dout),
   .dout(ram_dout)
-);
-
-// UART
-acia uart (
-  .reset(!rst_n),
-  .clk(clk_25mhz),
-  .cs(acia_cs),
-  .e_clk(cpu_E),
-  .rw_n(cpu_rw),
-  .rs(cpu_addr[1]),
-  .data_in(cpu_dout),
-  .data_out(acia_dout),
-  .txclk(baud),
-  .rxclk(baud),
-  .txdata(ftdi_rxd),
-  .rxdata(ftdi_txd),
-  .cts_n(1'b0),
-  .dcd_n(1'b0),
-  .irq_n()
 );
 
 endmodule

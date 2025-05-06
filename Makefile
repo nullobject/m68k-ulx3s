@@ -4,7 +4,8 @@ BUILDDIR = build
 
 PROG = blink
 PROG_C = rom/$(PROG).c
-PROG_O = rom/$(PROG).o
+PROG_O = $(BUILDDIR)/$(PROG).o
+PROG_OUT = $(BUILDDIR)/$(PROG).out
 PROG_BIN = $(BUILDDIR)/$(PROG).bin
 PROG_HEX = $(BUILDDIR)/$(PROG).hex
 FAKE_HEX = $(BUILDDIR)/rom.hex
@@ -36,12 +37,10 @@ $(FAKE_HEX):
 
 $(PROG_BIN): $(PROG_C)
 	mkdir -p $(BUILDDIR)
-	m68k-linux-gnu-gcc -Wall -m68000 -msoft-float -c $(PROG_C)
-	m68k-linux-gnu-ld --defsym=_start=main -Ttext=0x2000 -Tdata=0x3000 -Tbss=0x4000 --section-start=.rodata=0x5000 $(PROG_O) `m68k-linux-gnu-gcc -m68000 -print-libgcc-file-name`
-	m68k-linux-gnu-objcopy -I elf32-m68k -O binary a.out demo.run
+	m68k-linux-gnu-gcc -march=68000 -Os -fomit-frame-pointer -ffreestanding -nostdlib -nostartfiles $< -Wl,-Trom/linker_script.ld -o $@
 
 $(PROG_HEX): $(PROG_BIN)
-	hexdump -v -e '/1 "%02x\n"' $< > $@
+	hexdump -v -e '2/1 "%02X" "\n"' $< > $@
 
 $(BUILDDIR)/%.json: $(SRC) $(FAKE_HEX)
 	yosys -p "synth_ecp5 -abc9 -top top -json $@" $(SRC)
