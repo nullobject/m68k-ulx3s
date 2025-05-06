@@ -3,7 +3,7 @@ module top (
   input ftdi_txd,
   output ftdi_rxd,
   output wifi_gpio0,
-  output reg [7:0] led
+  output reg [7:0] led = 0
 );
 
 assign wifi_gpio0 = 1'b1;
@@ -29,9 +29,18 @@ always @(posedge clk_25mhz) begin
   rst_n <= 1;
 end
 
+reg [15:0] pwr_up_reset_counter = 0;
+wire       pwr_up_reset_n = &pwr_up_reset_counter;
+
+always @(posedge clk_25mhz) begin
+  if (!pwr_up_reset_n)
+    pwr_up_reset_counter <= pwr_up_reset_counter + 1;
+end
+
 // LED port
 always @(posedge clk_25mhz) begin
   if (led_cs && !cpu_rw) led <= cpu_dout;
+  // led <= cpu_addr[8:1];
 end
 
 // ===============================================================
@@ -51,13 +60,11 @@ wire cpu_fc1;
 wire cpu_fc2;
 reg  dtack_n = !vpa_n;         // Data transfer ack (always ready)
 wire bg_n;                     // Bus grant
-reg [7:0] R_cpu_control = 4;   // SPI loader, initially HALT to
-wire halt_n = ~R_cpu_control[2]; // prevent running SDRAM junk code
 
 // Address 0x600000 to 6fffff used for peripherals
 assign vpa_n = !(cpu_addr[23:18]==6'b011000) | cpu_as_n;
 
-always @(posedge clk_cpu) begin
+always @(posedge clk_25mhz) begin
   fx68_phi1 <= ~fx68_phi1;
   fx68_phi2 <=  fx68_phi1;
 end
@@ -65,9 +72,9 @@ end
 fx68k m68k (
   // input
   .clk(clk_25mhz),
-  .HALTn(halt_n),
-  .extReset(!rst_n),
-  .pwrUp(!rst_n),
+  .HALTn(1'b1),
+  .extReset(!pwr_up_reset_n),
+  .pwrUp(!pwr_up_reset_n),
   .enPhi1(fx68_phi1),
   .enPhi2(fx68_phi2),
 

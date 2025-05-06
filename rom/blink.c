@@ -1,7 +1,7 @@
 volatile unsigned char *LED = (unsigned char *)0x2000;
 
 void start(void) {
-  *LED = 0x3;
+  *LED = 0x0f;
 stop:
   goto stop;
 }
