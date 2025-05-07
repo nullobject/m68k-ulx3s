@@ -30,9 +30,9 @@ $(FAKE_HEX):
 	mkdir -p $(BUILDDIR)
 	ecpbram -w 16 -d 512 -g $@
 
-$(PROG_BIN): $(PROG_C)
+$(PROG_BIN): $(PROG_C) rom/linker_script.ld
 	mkdir -p $(BUILDDIR)
-	m68k-linux-gnu-gcc -march=68000 -Os -fomit-frame-pointer -ffreestanding -nostdlib -nostartfiles $< -Wl,-Trom/linker_script.ld -o $@
+	m68k-linux-gnu-gcc -Wall -march=68000 -Os -fomit-frame-pointer -ffreestanding -nostdlib -nostartfiles -Wl,-Trom/linker_script.ld -o $@ $<
 
 $(PROG_HEX): $(PROG_BIN)
 	hexdump -v -e '2/1 "%02X" "\n"' $< > $@

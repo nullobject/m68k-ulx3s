@@ -1,8 +1,20 @@
+#include <stdint.h>
+
+volatile uint8_t *LED = (uint8_t *)0x2000;
+
+void delay(int d) {
+  for (int i = 0; i < d; i++) {
+    asm("nop");
+  }
+}
+
 void start(void) {
-  unsigned char *LED = (unsigned char *)0x2000;
-  *LED = 0x1f;
-stop:
-  goto stop;
+loop:
+  for (int i = 0; i < 8; i++) {
+    *LED = 1 << i;
+    delay(100000);
+  }
+  goto loop;
 }
 
 void __attribute__((noreturn)) main(void) {
