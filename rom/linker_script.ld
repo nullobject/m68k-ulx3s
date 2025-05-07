@@ -1,7 +1,7 @@
 MEMORY
 {
-  ROM_VECTORS (RX) : ORIGIN = 0x00, LENGTH = 0x10
-  ROM_CODE    (RX) : ORIGIN = 0x10, LENGTH = 0x1000
+  rom_vectors (rx) : ORIGIN = 0x00, LENGTH = 0x10
+  rom_code    (rx) : ORIGIN = 0x10, LENGTH = 0x1000
 }
 
 SECTIONS
@@ -9,12 +9,12 @@ SECTIONS
   .text.startup :
   {
     *(.text.startup)
-  } > ROM_VECTORS
+  } > rom_vectors
 
   .text :
   {
     *(.text)
-  } > ROM_CODE
+  } > rom_code
 }
 
 OUTPUT_FORMAT(binary)
