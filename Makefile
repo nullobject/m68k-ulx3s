@@ -13,27 +13,22 @@ FAKE_HEX = $(BUILDDIR)/rom.hex
 SRC = $(wildcard hdl/*.v) $(wildcard lib/fx68k/*.v)
 
 all: $(BUILDDIR)/toplevel.bit
-.PHONY: all
 
 program: $(BUILDDIR)/toplevel.bit
 	fujprog $^
-.PHONY: program
 
 ftp: $(BUILDDIR)/toplevel.bit
 	ftp -u ftp://ulx3s/fpga $^
-.PHONY: ftp
 
 tty:
 	fujprog -t -b 9600
-.PHONY: tty
 
 clean:
 	rm -rf $(BUILDDIR)
-.PHONY: clean
 
 $(FAKE_HEX):
 	mkdir -p $(BUILDDIR)
-	ecpbram -w 8 -d 512 -g $@
+	ecpbram -w 16 -d 512 -g $@
 
 $(PROG_BIN): $(PROG_C)
 	mkdir -p $(BUILDDIR)
@@ -51,3 +46,6 @@ $(BUILDDIR)/%.config: $(PIN_DEF) $(BUILDDIR)/%.json
 $(BUILDDIR)/%.bit: $(BUILDDIR)/%.config $(PROG_HEX)
 	ecpbram -f $(FAKE_HEX) -t $(PROG_HEX) -i $< -o $(BUILDDIR)/temp.config
 	ecppack $(BUILDDIR)/temp.config $@ --compress
+
+.SECONDARY: $(BUILDDIR)/toplevel.config $(BUILDDIR)/toplevel.json
+.PHONY: all clean ftp program tty

@@ -56,8 +56,8 @@ end
 
 // LED port
 always @(posedge clk_25mhz) begin
-  // if (led_cs && !cpu_rw) led <= cpu_dout;
-  led <= cpu_addr[8:1];
+  if (led_cs && !cpu_rw) led <= cpu_dout;
+  // led <= cpu_addr[8:1];
 end
 
 always @(posedge clk_25mhz) begin
@@ -65,6 +65,13 @@ always @(posedge clk_25mhz) begin
   fx68_phi2 <= fx68_phi1;
 end
 
+// reg [22-1:0] delay_cnt;
+// always @(posedge clk_25mhz)
+// begin
+//   fx68_phi1 <= delay_cnt == 0;
+//   fx68_phi2 <= delay_cnt == {1'b1,{(22-1){1'b0}}};
+//   delay_cnt <= delay_cnt + 1;
+// end
 
 fx68k m68k (
   // clock/reset

@@ -1,6 +1,6 @@
 void start(void) {
   unsigned char *LED = (unsigned char *)0x2000;
-  *LED = 0x0f;
+  *LED = 0x1f;
 stop:
   goto stop;
 }
