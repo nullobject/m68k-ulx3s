@@ -1,9 +1,10 @@
 module top (
   input clk_25mhz,
+  input [6:0] btn,
   input ftdi_txd,
   output ftdi_rxd,
   output wifi_gpio0,
-  output reg [7:0] led = 0
+  output reg [7:0] led
 );
 
 assign wifi_gpio0 = 1'b1;
@@ -16,36 +17,6 @@ wire [15:0] cpu_din;
 wire [15:0] rom_dout;
 wire [15:0] ram_dout;
 
-// chip select
-wire rom_cs = !vma_n && cpu_addr[15:12] == 4'h0;
-wire ram_cs = !vma_n && cpu_addr[15:12] == 4'h1;
-wire led_cs = !vma_n && cpu_addr[15:12] == 4'h2;
-
-// decode CPU input data bus
-assign cpu_din = ram_cs ? ram_dout : rom_dout;
-
-// reset
-always @(posedge clk_25mhz) begin
-  rst_n <= 1;
-end
-
-reg [15:0] pwr_up_reset_counter = 0;
-wire       pwr_up_reset_n = &pwr_up_reset_counter;
-
-always @(posedge clk_25mhz) begin
-  if (!pwr_up_reset_n)
-    pwr_up_reset_counter <= pwr_up_reset_counter + 1;
-end
-
-// LED port
-always @(posedge clk_25mhz) begin
-  if (led_cs && !cpu_rw) led <= cpu_dout;
-  // led <= cpu_addr[8:1];
-end
-
-// ===============================================================
-// 68000 CPU
-// ===============================================================
 reg  fx68_phi1;                // Phi 1 enable
 reg  fx68_phi2;                // Phi 2 enable (for slow cpu)
 wire cpu_rw;                   // Read = 1, Write = 0
@@ -59,21 +30,47 @@ wire cpu_fc0;                  // Processor state
 wire cpu_fc1;
 wire cpu_fc2;
 reg  dtack_n = !vpa_n;         // Data transfer ack (always ready)
-wire bg_n;                     // Bus grant
 
-// Address 0x600000 to 6fffff used for peripherals
-assign vpa_n = !(cpu_addr[23:18]==6'b011000) | cpu_as_n;
+// address 0x2000 to 0x2fff used for peripherals
+assign vpa_n = !(cpu_addr[15:12] == 4'h2) | cpu_as_n;
+
+// chip select
+wire ram_cs = cpu_addr[15:12] == 4'h1;
+wire led_cs = !vma_n && cpu_addr[15:12] == 4'h2;
+
+// decode CPU input data bus
+assign cpu_din = ram_cs ? ram_dout : rom_dout;
+
+reg [15:0] pwr_up_reset_counter = 0;
+wire pwr_up_reset_n = &pwr_up_reset_counter;
+
+always @(posedge clk_25mhz) begin
+  if (!pwr_up_reset_n)
+    pwr_up_reset_counter <= pwr_up_reset_counter + 1;
+end
+
+// reset
+always @(posedge clk_25mhz) begin
+  rst_n <= 1;
+end
+
+// LED port
+always @(posedge clk_25mhz) begin
+  // if (led_cs && !cpu_rw) led <= cpu_dout;
+  led <= cpu_addr[8:1];
+end
 
 always @(posedge clk_25mhz) begin
   fx68_phi1 <= ~fx68_phi1;
-  fx68_phi2 <=  fx68_phi1;
+  fx68_phi2 <= fx68_phi1;
 end
 
+
 fx68k m68k (
-  // input
+  // clock/reset
   .clk(clk_25mhz),
   .HALTn(1'b1),
-  .extReset(!pwr_up_reset_n),
+  .extReset(!pwr_up_reset_n || !btn[0]),
   .pwrUp(!pwr_up_reset_n),
   .enPhi1(fx68_phi1),
   .enPhi2(fx68_phi2),
@@ -88,8 +85,8 @@ fx68k m68k (
   .FC0(cpu_fc0),
   .FC1(cpu_fc1),
   .FC2(cpu_fc2),
-  .BGn(bg_n),
-  .oRESETn(rst_n),
+  .BGn(),
+  .oRESETn(),
   .oHALTEDn(),
 
   // input
