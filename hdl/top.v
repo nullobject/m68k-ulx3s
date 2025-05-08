@@ -25,7 +25,7 @@ wire vpa_n;           // Valid peripheral address
 reg dtack_n = !vpa_n; // Data transfer ack (always ready)
 
 // address 0x2000 to 0x3fff used for peripherals
-assign vpa_n = !(cpu_addr[15:12] == 4'h3) | cpu_as_n;
+assign vpa_n = !(cpu_addr[15:12] > 1) | cpu_as_n;
 
 // chip select
 wire ram_cs = cpu_addr[15:12] == 1;
