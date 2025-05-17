@@ -1,6 +1,8 @@
 module top (
   input clk_25mhz,
   input [6:0] btn,
+  output [27:0] gp,
+  output [27:0] gn,
   input ftdi_txd,
   output ftdi_rxd,
   output wifi_gpio0,
