@@ -4,36 +4,36 @@ module top (
   input ftdi_txd,
   output ftdi_rxd,
   output wifi_gpio0,
-  output reg [7:0] led
+  output reg [7:0] led,
+  output reg [3:0] gp,
+  output reg [3:0] gn
 );
 
 assign wifi_gpio0 = 1'b1;
 
-wire [23:1] cpu_addr;
+wire [23:0] cpu_addr;
 wire [15:0] cpu_dout;
 wire [15:0] cpu_din;
 wire [15:0] rom_dout;
 wire [15:0] ram_dout;
 wire [7:0] acia_dout;
-wire cpu_rw;          // Read = 1, Write = 0
-wire cpu_as_n;        // Address strobe
-wire cpu_lds_n;       // Lower byte
-wire cpu_uds_n;       // Upper byte
-wire cpu_E;           // Peripheral enable
-wire vma_n;           // Valid memory address
-wire vpa_n;           // Valid peripheral address
-reg dtack_n = !vpa_n; // Data transfer ack (always ready)
+
+wire cpu_rw;    // read = 1, write = 0
+wire cpu_as_n;  // address strobe
+wire cpu_lds_n; // lower byte
+wire cpu_uds_n; // upper byte
+wire cpu_E;     // peripheral enable
+wire vma_n;     // valid memory address
+wire vpa_n;     // valid peripheral address
 
 // address 0x2000 to 0x3fff used for peripherals
 assign vpa_n = !(cpu_addr[15:12] > 1) | cpu_as_n;
 
 // chip select
 wire ram_cs = cpu_addr[15:12] == 1;
-wire led_cs = !vma_n && cpu_addr[15:12] == 2;
+wire led_cs = !vma_n && cpu_addr == 16'h2000;
+wire gpio_cs = !vma_n && cpu_addr == 16'h2002;
 wire acia_cs = !vma_n && cpu_addr[15:12] == 3;
-
-// decode CPU input data bus
-assign cpu_din = acia_cs ? {acia_dout, 8'h0} : (ram_cs ? ram_dout : rom_dout);
 
 // reset
 reg rst_n = 0;
@@ -42,9 +42,25 @@ always @(posedge clk_25mhz) begin
   rst_n <= 1;
 end
 
-// LED port
+// DTACK
+reg dtack_n; // Data transfer ack (always ready)
+
+always @(posedge clk_25mhz) begin
+  dtack_n <= !vpa_n;
+end
+
+// LED
 always @(posedge clk_25mhz) begin
   if (led_cs && !cpu_rw) led <= cpu_dout;
+end
+
+// GPIO
+reg [7:0] gpio = 0;
+assign gp = {gpio[6], gpio[4], gpio[2], gpio[0]};
+assign gn = {gpio[7], gpio[5], gpio[3], gpio[1]};
+
+always @(posedge clk_25mhz) begin
+  if (gpio_cs && !cpu_rw) gpio <= cpu_dout;
 end
 
 // baud clock
@@ -65,6 +81,9 @@ always @(posedge clk_25mhz) begin
   fx68_phi1 <= ~fx68_phi1;
   fx68_phi2 <= fx68_phi1;
 end
+
+// decode CPU input data bus
+assign cpu_din = acia_cs ? {acia_dout, 8'h0} : (gpio_cs ? {gpio, 8'h0} : (ram_cs ? ram_dout : rom_dout));
 
 fx68k m68k (
   // clock/reset
@@ -98,7 +117,7 @@ fx68k m68k (
   .IPL2n(1'b1),
 
   // busses
-  .eab(cpu_addr),
+  .eab(cpu_addr[23:1]),
   .iEdb(cpu_din),
   .oEdb(cpu_dout)
 );
@@ -106,19 +125,19 @@ fx68k m68k (
 // ROM
 rom #(
   .MEM_INIT_FILE("../build/rom.hex"),
-  .DEPTH(512)
+  .DEPTH(2048)
 ) prog_rom (
   .clk(clk_25mhz),
-  .addr(cpu_addr[8:1]),
+  .addr(cpu_addr[11:1]),
   .dout(rom_dout)
 );
 
 // RAM
 ram #(
-  .DEPTH(4096)
+  .DEPTH(2048)
 ) work_ram (
   .clk(clk_25mhz),
-  .we(!cpu_rw),
+  .we(ram_cs && !cpu_rw),
   .mask({!cpu_uds_n, !cpu_lds_n}),
   .addr(cpu_addr[11:1]),
   .din(cpu_dout),

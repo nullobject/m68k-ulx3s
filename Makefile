@@ -2,7 +2,7 @@ DEVICE = 85k
 PIN_DEF = ulx3s_v20.lpf
 BUILDDIR = build
 
-PROG = blink
+PROG = display
 PROG_C = rom/$(PROG).c
 PROG_O = $(BUILDDIR)/$(PROG).o
 PROG_OUT = $(BUILDDIR)/$(PROG).out
@@ -28,7 +28,7 @@ clean:
 
 $(FAKE_HEX):
 	mkdir -p $(BUILDDIR)
-	ecpbram -w 16 -d 512 -g $@
+	ecpbram -w 16 -d 2048 -g $@
 
 $(PROG_BIN): $(PROG_C) rom/linker_script.ld
 	mkdir -p $(BUILDDIR)
