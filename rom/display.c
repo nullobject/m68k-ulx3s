@@ -4,30 +4,22 @@
 #define HIGH 1
 #define LOW 0
 
-#define OLED_CS 0    // chip select
-#define OLED_RESET 1 // reset
-#define OLED_MOSI 2  // serial data
-#define OLED_CLK 3   // serial clock
-#define OLED_DC 4    // register select
+#define OLED_CS 0  // chip select
+#define OLED_RES 1 // reset
+#define OLED_E 2   // enable
+#define OLED_RW 3  // read/write
+#define OLED_DC 4  // data/command
+
+#define OLED_DISPLAY_MODE_OFF 0
+#define OLED_DISPLAY_MODE_ON 1
+#define OLED_DISPLAY_MODE_NORMAL 2
+#define OLED_DISPLAY_MODE_INVERT 3
 
 volatile uint8_t *LED = (uint8_t *)0x2000;
-volatile uint8_t *GPIO = (uint8_t *)0x2002;
+volatile uint8_t *GPIO_A = (uint8_t *)0x4000;
+volatile uint8_t *GPIO_B = (uint8_t *)0x4002;
 
-void delay(int d) {
-  for (int i = 0; i < d; i++) {
-    asm("nop");
-  }
-}
-
-void digital_write(uint8_t pin, uint8_t val) {
-  if (val == LOW) {
-    *GPIO &= ~(1 << pin);
-  } else {
-    *GPIO |= (1 << pin);
-  }
-}
-
-unsigned char logo[] = {
+uint8_t logo[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -200,42 +192,44 @@ unsigned char logo[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-void data(unsigned char d) {
-  digital_write(OLED_CS, LOW);
-  digital_write(OLED_DC, HIGH);
-  for (uint16_t n = 0; n < 8; n++) {
-    if ((d & 0x80) == 0x80) {
-      digital_write(OLED_MOSI, HIGH);
-    } else {
-      digital_write(OLED_MOSI, LOW);
-    }
-    d = (d << 1);
-    digital_write(OLED_CLK, LOW);
-    digital_write(OLED_CLK, HIGH);
-    digital_write(OLED_CLK, LOW);
+void delay(uint16_t d) {
+  for (uint16_t i = 0; i < d; i++) {
+    asm("nop");
   }
-  digital_write(OLED_CS, HIGH);
 }
 
-void command(unsigned char d) {
-  digital_write(OLED_CS, LOW);
-  digital_write(OLED_DC, LOW);
-  for (uint16_t n = 0; n < 8; n++) {
-    if ((d & 0x80) == 0x80) {
-      digital_write(OLED_MOSI, HIGH);
-    } else {
-      digital_write(OLED_MOSI, LOW);
-    }
-    d = (d << 1);
-    digital_write(OLED_CLK, LOW);
-    digital_write(OLED_CLK, HIGH);
-    digital_write(OLED_CLK, LOW);
+void digital_write(uint8_t pin, uint8_t val) {
+  if (val == LOW) {
+    *GPIO_A &= ~(1 << pin);
+  } else {
+    *GPIO_A |= (1 << pin);
   }
+}
+
+void command(uint8_t d) {
+  *GPIO_B = d;
+  digital_write(OLED_RW, LOW);
+  digital_write(OLED_DC, LOW);
+  digital_write(OLED_CS, LOW);
+  digital_write(OLED_E, LOW);
+  asm("nop");
   digital_write(OLED_CS, HIGH);
+  digital_write(OLED_E, HIGH);
+}
+
+void data(uint8_t d) {
+  *GPIO_B = d;
+  digital_write(OLED_RW, LOW);
+  digital_write(OLED_DC, HIGH);
+  digital_write(OLED_CS, LOW);
+  digital_write(OLED_E, LOW);
+  asm("nop");
+  digital_write(OLED_CS, HIGH);
+  digital_write(OLED_E, HIGH);
 }
 
 // Set Column Address
-void cmd_set_column_address(unsigned char a, unsigned char b) {
+void cmd_set_column_address(uint8_t a, uint8_t b) {
   command(0x15);
   data(a);
   data(b);
@@ -245,71 +239,66 @@ void cmd_set_column_address(unsigned char a, unsigned char b) {
 void cmd_write_ram() { command(0x5C); }
 
 // Set Row Start and End Address
-void cmd_set_row_address(unsigned char a, unsigned char b) {
+void cmd_set_row_address(uint8_t a, uint8_t b) {
   command(0x75);
   data(a);
   data(b);
 }
 
 // Set Remap
-void cmd_set_remap_format(unsigned char a, unsigned char b) {
+void cmd_set_remap_format(uint8_t a, uint8_t b) {
   command(0xA0);
   data(a);
   data(b);
 }
 
 // Set Display RAM Display Start Line
-void cmd_set_start_line(unsigned char a) {
+void cmd_set_start_line(uint8_t a) {
   command(0xA1);
   data(a);
 }
 
 // Set Verticle Shift
-void cmd_set_display_offset(unsigned char a) {
+void cmd_set_display_offset(uint8_t a) {
   command(0xA2);
   data(a);
 }
 
-#define OLED_DISPLAY_MODE_OFF 0
-#define OLED_DISPLAY_MODE_ON 1
-#define OLED_DISPLAY_MODE_NORMAL 2
-#define OLED_DISPLAY_MODE_INVERT 3
-
-void cmd_set_display_mode(unsigned char a) { command(0xA4 | a); }
+void cmd_set_display_mode(uint8_t a) { command(0xA4 | a); }
 
 // Function Selection
-void cmd_set_function_selection(unsigned char a) {
+void cmd_set_function_selection(uint8_t a) {
   command(0xAB);
   data(a);
 }
 
 // Set Phase Length
-void cmd_set_phase_length(unsigned char a) {
+void cmd_set_phase_length(uint8_t a) {
   command(0xB1);
   data(a);
 }
 
 // Set Osc Frequency
-void cmd_set_display_clock(unsigned char a) {
+void cmd_set_display_clock(uint8_t a) {
   command(0xB3);
   data(a);
 }
 
 // Enable External VSL
-void cmd_set_display_enhancement_a(unsigned char a, unsigned char b) {
+void cmd_set_display_enhancement_a(uint8_t a, uint8_t b) {
   command(0xB4);
   data(a);
   data(b);
 }
 
 // Set GPIO
-void cmd_set_gpio(unsigned char a) {
+void cmd_set_gpio(uint8_t a) {
   command(0xB5);
   data(a);
 }
 
 // Set Second Precharge Period
-void cmd_set_precharge_period(unsigned char a) {
+void cmd_set_precharge_period(uint8_t a) {
   command(0xB6);
   data(a);
 }
@@ -318,57 +307,57 @@ void cmd_set_precharge_period(unsigned char a) {
 void cmd_set_linear_grayscale_table() { command(0xB9); }
 
 // Set Precharge Voltage Level
-void cmd_set_precharge_voltage(unsigned char a) {
+void cmd_set_precharge_voltage(uint8_t a) {
   command(0xBB);
   data(a);
 }
 
 // Set Second Precharge Period
-void cmd_set_vcomh(unsigned char a) {
+void cmd_set_vcomh(uint8_t a) {
   command(0xBE);
   data(a);
 }
 
 // Set Contrast Control Level
-void cmd_set_contract_current(unsigned char a) {
+void cmd_set_contract_current(uint8_t a) {
   command(0xC1);
   data(a);
 }
 
 // Master Contrast Control
-void cmd_set_master_current(unsigned char a) {
+void cmd_set_master_current(uint8_t a) {
   command(0xC7);
   data(a);
 }
 
 // Set MUX Ratio
-void cmd_set_mux_ratio(unsigned char a) {
+void cmd_set_mux_ratio(uint8_t a) {
   command(0xCA);
   data(a);
 }
 
 // Display Enhancement
-void cmd_set_display_enhancement_b(unsigned char a) {
+void cmd_set_display_enhancement_b(uint8_t a) {
   command(0xD1);
   data(a);
   data(0x20);
 }
 
 // Set Lock/Unlock Commands
-void cmd_unlock(unsigned char a) {
+void cmd_unlock(uint8_t a) {
   command(0xFD);
   data(a);
 }
 
-void cmd_set_display_enable(unsigned char a) { command(0xAE | a); }
+void cmd_set_display_enable(uint8_t a) { command(0xAE | a); }
 
 void oled_clear() {
   cmd_set_column_address(0x1C, 0x5B);
   cmd_set_row_address(0x00, 0x3F);
   cmd_write_ram();
 
-  for (uint16_t i = 0; i < 64; i++) {
-    for (uint16_t j = 0; j < 128; j++) {
+  for (uint8_t i = 0; i < 64; i++) {
+    for (uint8_t j = 0; j < 128; j++) {
       data(0x00);
     }
   }
@@ -379,8 +368,8 @@ void oled_fill() {
   cmd_set_row_address(0x00, 0x3F);
   cmd_write_ram();
 
-  for (uint16_t i = 0; i < 32; i++) {
-    for (uint16_t j = 0; j < 64; j++) {
+  for (uint8_t i = 0; i < 32; i++) {
+    for (uint8_t j = 0; j < 64; j++) {
       data(0xFF);
       data(0x00);
     }
@@ -391,15 +380,15 @@ void oled_fill() {
   }
 }
 
-void oled_image(unsigned char *image) {
+void oled_image(uint8_t *image) {
   cmd_set_remap_format(0x14, 0x11);
   cmd_set_column_address(0x1C, 0x5B);
   cmd_set_row_address(0x00, 0x3F);
   cmd_write_ram();
 
-  for (uint16_t i = 0; i < 64; i++) {
-    for (uint16_t j = 0; j < 32; j++) {
-      unsigned int buff = *image;
+  for (uint8_t i = 0; i < 64; i++) {
+    for (uint8_t j = 0; j < 32; j++) {
+      uint8_t buff = *image;
       buff = ((buff >> 6) & 0x03);
       if (buff == 0x03) {
         data(0xFF);
@@ -407,8 +396,9 @@ void oled_image(unsigned char *image) {
         data(0xF0);
       } else if (buff == 0x01) {
         data(0x0F);
-      } else
+      } else {
         data(0x00);
+      }
 
       buff = *image;
       buff = ((buff >> 4) & 0x03);
@@ -418,8 +408,9 @@ void oled_image(unsigned char *image) {
         data(0xF0);
       } else if (buff == 0x01) {
         data(0x0F);
-      } else
+      } else {
         data(0x00);
+      }
 
       buff = *image;
       buff = ((buff >> 2) & 0x03);
@@ -429,8 +420,9 @@ void oled_image(unsigned char *image) {
         data(0xF0);
       } else if (buff == 0x01) {
         data(0x0F);
-      } else
+      } else {
         data(0x00);
+      }
 
       buff = *image;
       buff = (buff & 0x03);
@@ -440,8 +432,9 @@ void oled_image(unsigned char *image) {
         data(0xF0);
       } else if (buff == 0x01) {
         data(0x0F);
-      } else
+      } else {
         data(0x00);
+      }
 
       image++;
     }
@@ -472,28 +465,32 @@ void oled_init() {
 }
 
 void start(void) {
-  digital_write(OLED_RESET, LOW);
+  digital_write(OLED_CS, HIGH);
+  digital_write(OLED_E, HIGH);
+  digital_write(OLED_RES, LOW);
   delay(100);
-  digital_write(OLED_RESET, HIGH);
+  digital_write(OLED_RES, HIGH);
   delay(100);
 
   oled_init();
   delay(100);
 
   while (1) {
+    *LED = 1;
+    oled_clear();
+    delay(100);
     oled_fill();
     delay(100);
-    oled_clear();
-    delay(100);
 
-    oled_image(logo);
-    delay(100);
+    *LED = 0;
     oled_clear();
+    delay(100);
+    oled_image(logo);
     delay(100);
   }
 }
 
-void __attribute__((noreturn)) main(void) {
+int __attribute__((noreturn)) main(void) {
   asm("dc.l 0x2000"); // Set stack to top of RAM
   asm("dc.l start");
   __builtin_unreachable();

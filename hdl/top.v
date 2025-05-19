@@ -5,8 +5,8 @@ module top (
   output ftdi_rxd,
   output wifi_gpio0,
   output reg [7:0] led,
-  output reg [3:0] gp,
-  output reg [3:0] gn
+  output reg [7:0] gp,
+  output reg [7:0] gn
 );
 
 assign wifi_gpio0 = 1'b1;
@@ -31,9 +31,11 @@ assign vpa_n = !(cpu_addr[15:12] > 1) | cpu_as_n;
 
 // chip select
 wire ram_cs = cpu_addr[15:12] == 1;
-wire led_cs = !vma_n && cpu_addr == 16'h2000;
-wire gpio_cs = !vma_n && cpu_addr == 16'h2002;
+wire led_cs = !vma_n && cpu_addr[15:12] == 2;
 wire acia_cs = !vma_n && cpu_addr[15:12] == 3;
+wire gpio_cs = !vma_n && cpu_addr[15:12] == 4;
+wire gpio_a_cs = gpio_cs && cpu_addr[1] == 0;
+wire gpio_b_cs = gpio_cs && cpu_addr[1] == 1;
 
 // reset
 reg rst_n = 0;
@@ -55,12 +57,11 @@ always @(posedge clk_25mhz) begin
 end
 
 // GPIO
-reg [7:0] gpio = 0;
-assign gp = {gpio[6], gpio[4], gpio[2], gpio[0]};
-assign gn = {gpio[7], gpio[5], gpio[3], gpio[1]};
-
 always @(posedge clk_25mhz) begin
-  if (gpio_cs && !cpu_rw) gpio <= cpu_dout;
+  if (!cpu_rw) begin
+    if (gpio_a_cs) gp <= cpu_dout;
+    if (gpio_b_cs) gn <= cpu_dout;
+  end
 end
 
 // baud clock
@@ -83,7 +84,11 @@ always @(posedge clk_25mhz) begin
 end
 
 // decode CPU input data bus
-assign cpu_din = acia_cs ? {acia_dout, 8'h0} : (gpio_cs ? {gpio, 8'h0} : (ram_cs ? ram_dout : rom_dout));
+assign cpu_din = acia_cs ? {acia_dout, 8'h0} :
+  (gpio_a_cs ? {gp, 8'h0} :
+  (gpio_b_cs ? {gn, 8'h0} :
+  (ram_cs ? ram_dout :
+  rom_dout)));
 
 fx68k m68k (
   // clock/reset
