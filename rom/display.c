@@ -443,12 +443,12 @@ void oled_init() {
   cmd_set_remap_format(0x14, 0x11);
   cmd_set_gpio(0x00);
   cmd_set_function_selection(0x01);
-  cmd_set_display_enhancement_a(0xA0, 0xFD); // enable external VSL
+  cmd_set_display_enhancement_a(0xA0, 0xB5); // enable external VSL
   cmd_set_contract_current(0xCF);
   cmd_set_master_current(0x0F);
   cmd_set_linear_grayscale_table();
   cmd_set_phase_length(0xE2);
-  cmd_set_display_enhancement_b(0xA2);
+  // cmd_set_display_enhancement_b(0xA2);
   cmd_set_precharge_voltage(0X1F);
   cmd_set_precharge_period(0x08);
   cmd_set_vcomh(0x07);

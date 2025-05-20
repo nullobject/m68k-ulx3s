@@ -68,4 +68,15 @@ always @(posedge clk, posedge rst) begin
   end
 end
 
+// Initialization bytes for the OLED display
+rom #(
+  .MEM_INIT_FILE("OLED.hex"),
+  .DEPTH(64),
+  .DATA_WIDTH(8)
+) init_rom (
+  .clk(clk),
+  .addr(),
+  .dout()
+);
+
 endmodule
