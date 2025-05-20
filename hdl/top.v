@@ -40,21 +40,18 @@ wire gpio_b_cs = gpio_cs && cpu_addr[1] == 1;
 // reset
 reg rst_n = 0;
 
-always @(posedge clk_25mhz) begin
+always @(posedge clk_25mhz)
   rst_n <= 1;
-end
 
 // DTACK
 reg dtack_n; // Data transfer ack (always ready)
 
-always @(posedge clk_25mhz) begin
+always @(posedge clk_25mhz)
   dtack_n <= !vpa_n;
-end
 
 // LED
-always @(posedge clk_25mhz) begin
+always @(posedge clk_25mhz)
   if (led_cs && !cpu_rw) led <= cpu_dout;
-end
 
 // GPIO
 always @(posedge clk_25mhz) begin
