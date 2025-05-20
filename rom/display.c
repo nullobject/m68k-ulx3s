@@ -207,23 +207,17 @@ void digital_write(uint8_t pin, uint8_t val) {
 }
 
 void command(uint8_t d) {
-  digital_write(OLED_CS, LOW);
   digital_write(OLED_DC, LOW);
-  digital_write(OLED_RW, LOW);
   digital_write(OLED_E, HIGH);
   *GPIO_B = d;
   digital_write(OLED_E, LOW);
-  digital_write(OLED_CS, HIGH);
 }
 
 void data(uint8_t d) {
-  digital_write(OLED_CS, LOW);
   digital_write(OLED_DC, HIGH);
-  digital_write(OLED_RW, LOW);
   digital_write(OLED_E, HIGH);
   *GPIO_B = d;
   digital_write(OLED_E, LOW);
-  digital_write(OLED_CS, HIGH);
 }
 
 // Set Column Address
@@ -463,8 +457,8 @@ void oled_init() {
 }
 
 void start(void) {
-  digital_write(OLED_CS, HIGH);
-  digital_write(OLED_E, HIGH);
+  digital_write(OLED_CS, LOW);
+  digital_write(OLED_RW, LOW);
   digital_write(OLED_RES, LOW);
   delay(100);
   digital_write(OLED_RES, HIGH);
