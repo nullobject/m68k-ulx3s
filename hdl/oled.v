@@ -1,6 +1,15 @@
+// TODO:
+// * Add framebuffer dual-port RAM
+// * Add intial reset states
+// * Change idle state to wait for a start signal
+// * When start signal is received, write framebuffer to OLED
+// * Send the set row/col commands by appending them to the ROM. Store the
+// offsets in a localparam and play the sequence of bytes before writing to
+// VRAM.
 module oled (
     input clk,
     input rst,
+    output done,
     output reg oled_cs,
     output reg oled_e,
     output reg oled_rw,
@@ -12,10 +21,11 @@ module oled (
 
   localparam OLED_ROM_SIZE = 36;
 
-  reg [5:0] addr;
-  reg [2:0] state;
+  reg  [5:0] addr;
+  reg  [2:0] state;
   wire [7:0] rom_dout;
-  wire done = addr == OLED_ROM_SIZE - 1;
+
+  assign done = addr >= OLED_ROM_SIZE - 1;
 
   always @(posedge clk, posedge rst) begin
     if (rst) begin

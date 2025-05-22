@@ -23,6 +23,11 @@ ftp: $(BUILDDIR)/toplevel.bit
 tty:
 	fujprog -t -b 9600
 
+sim:
+	verilator --cc --exe --build -j 0 -Wall --trace -I./hdl sim_main.cpp hdl/oled.v
+	$(MAKE) -j -C obj_dir -f Voled.mk
+	obj_dir/Voled
+
 clean:
 	rm -rf $(BUILDDIR)
 
@@ -48,4 +53,4 @@ $(BUILDDIR)/%.bit: $(BUILDDIR)/%.config $(PROG_HEX)
 	ecppack $(BUILDDIR)/temp.config $@ --compress
 
 .SECONDARY: $(BUILDDIR)/toplevel.config $(BUILDDIR)/toplevel.json
-.PHONY: all clean ftp program tty
+.PHONY: all clean ftp program sim tty
