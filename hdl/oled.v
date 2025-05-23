@@ -12,7 +12,6 @@ module oled (
     output done,
     output reg oled_cs,
     output reg oled_e,
-    output reg oled_rw,
     output reg oled_dc,
     output reg [7:0] oled_dout
 );
@@ -54,7 +53,6 @@ module oled (
       addr <= 0;
       oled_cs <= 1;
       oled_e <= 1;
-      oled_rw <= 0;
       oled_dc <= 0;
     end else begin
       case (state)

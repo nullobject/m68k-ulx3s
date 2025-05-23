@@ -7,8 +7,7 @@
 #define OLED_CS 0  // chip select
 #define OLED_RES 1 // reset
 #define OLED_E 2   // enable
-#define OLED_RW 3  // read/write
-#define OLED_DC 4  // data/command
+#define OLED_DC 3  // data/command
 
 #define OLED_DISPLAY_MODE_OFF 0
 #define OLED_DISPLAY_MODE_ON 1
@@ -458,7 +457,6 @@ void oled_init() {
 
 void start(void) {
   digital_write(OLED_CS, LOW);
-  digital_write(OLED_RW, LOW);
   digital_write(OLED_RES, LOW);
   delay(100);
   digital_write(OLED_RES, HIGH);
