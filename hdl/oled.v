@@ -23,9 +23,23 @@ module oled (
 
   reg  [5:0] addr;
   reg  [2:0] state;
+  reg  [1:0] counter;
   wire [7:0] rom_dout;
 
   assign done = addr >= OLED_ROM_SIZE - 1;
+
+  function automatic [1:0] arity(input reg [7:0] a);
+    case (a)
+      8'h15:   arity = 2;
+      8'h75:   arity = 2;
+      8'hA0:   arity = 2;
+      8'hAE:   arity = 0;
+      8'hAF:   arity = 0;
+      8'hB4:   arity = 2;
+      8'hD1:   arity = 2;
+      default: arity = 1;
+    endcase
+  endfunction
 
   always @(posedge clk, posedge rst) begin
     if (rst) begin
@@ -44,12 +58,13 @@ module oled (
         LOAD_COMMAND: begin
           state <= SEND_COMMAND;
           addr <= addr + 1;
+          counter <= arity(rom_dout);
           oled_dc <= 0;
           oled_e <= 1;
           oled_dout <= rom_dout;
         end
         SEND_COMMAND: begin
-          state  <= LOAD_DATA;
+          state  <= counter > 0 ? LOAD_DATA : LOAD_COMMAND;
           oled_e <= 0;
         end
         LOAD_DATA: begin
@@ -60,7 +75,7 @@ module oled (
           oled_dout <= rom_dout;
         end
         SEND_DATA: begin
-          state  <= done ? DONE : LOAD_COMMAND;
+          state  <= done ? DONE : counter > 0 ? LOAD_DATA : LOAD_COMMAND;
           oled_e <= 0;
         end
         DONE: begin
