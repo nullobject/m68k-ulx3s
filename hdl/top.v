@@ -54,12 +54,12 @@ always @(posedge clk_25mhz)
   if (led_cs && !cpu_rw) led <= cpu_dout;
 
 // GPIO
-always @(posedge clk_25mhz) begin
-  if (!cpu_rw) begin
-    if (gpio_a_cs) gp <= cpu_dout;
-    if (gpio_b_cs) gn <= cpu_dout;
-  end
-end
+// always @(posedge clk_25mhz) begin
+//   if (!cpu_rw) begin
+//     if (gpio_a_cs) gp <= cpu_dout;
+//     if (gpio_b_cs) gn <= cpu_dout;
+//   end
+// end
 
 // baud clock
 reg [7:0] baud_cnt = 0;
@@ -163,6 +163,16 @@ acia uart (
   .cts_n(1'b0),
   .dcd_n(1'b0),
   .irq_n()
+);
+
+oled oled (
+  .clk(clk_25mhz),
+  .rst(!rst_n),
+  .oled_cs(gp[0]),
+  .oled_rst(gp[1]),
+  .oled_e(gp[2]),
+  .oled_dc(gp[3]),
+  .oled_dout(gn)
 );
 
 endmodule
