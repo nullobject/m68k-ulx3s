@@ -36,6 +36,7 @@ wire acia_cs = !vma_n && cpu_addr[15:12] == 3;
 wire gpio_cs = !vma_n && cpu_addr[15:12] == 4;
 wire gpio_a_cs = gpio_cs && cpu_addr[1] == 0;
 wire gpio_b_cs = gpio_cs && cpu_addr[1] == 1;
+wire vram_cs = cpu_addr[15:14] == 1;
 
 // reset
 reg rst_n = 0;
@@ -165,12 +166,13 @@ acia uart (
   .irq_n()
 );
 
+// GPU
 gpu gpu (
   .clk(clk_25mhz),
   .rst(!rst_n),
-  .vram_wr(false),
-  .vram_addr(0),
-  .vram_data(0),
+  .vram_wr(vram_cs && !cpu_rw),
+  .vram_addr(cpu_addr[14:1]),
+  .vram_data(cpu_dout[7:0]),
   .oled_cs(gp[0]),
   .oled_rst(gp[1]),
   .oled_e(gp[2]),
