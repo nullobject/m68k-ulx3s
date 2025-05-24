@@ -11,6 +11,7 @@ module oled (
     input rst,
     output done,
     output reg oled_cs,
+    output reg oled_rst,
     output reg oled_e,
     output reg oled_dc,
     output reg [7:0] oled_dout
@@ -32,6 +33,7 @@ module oled (
   reg  [1:0] counter;
   wire [7:0] rom_dout;
 
+  assign oled_rst = !rst;
   assign done = addr >= OLED_ROM_SIZE - 1;
 
   function [1:0] arity(input reg [7:0] cmd);
