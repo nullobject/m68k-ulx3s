@@ -165,9 +165,12 @@ acia uart (
   .irq_n()
 );
 
-oled oled (
+gpu gpu (
   .clk(clk_25mhz),
   .rst(!rst_n),
+  .vram_wr(false),
+  .vram_addr(0),
+  .vram_data(0),
   .oled_cs(gp[0]),
   .oled_rst(gp[1]),
   .oled_e(gp[2]),

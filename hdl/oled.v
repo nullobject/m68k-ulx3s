@@ -7,13 +7,21 @@
 // offsets in a localparam and play the sequence of bytes before writing to
 // VRAM.
 module oled (
-    input clk,
-    input rst,
+    input  clk,
+    input  rst,
     output done,
-    output reg oled_cs,
-    output reg oled_rst,
-    output reg oled_e,
-    output reg oled_dc,
+
+    // VRAM
+    output reg [12:0] vram_addr,
+    /* verilator lint_off UNUSEDSIGNAL */
+    input      [ 7:0] vram_q,
+    /* verilator lint_on UNUSEDSIGNAL */
+
+    // OLED
+    output reg       oled_cs,
+    output reg       oled_rst,
+    output reg       oled_e,
+    output reg       oled_dc,
     output reg [7:0] oled_dout
 );
 
@@ -33,6 +41,7 @@ module oled (
   reg  [5:0] counter;
   wire [7:0] rom_dout;
 
+  assign vram_addr = 0;
   assign oled_rst = !rst;
   assign done = addr == OLED_ROM_SIZE - 1;
 
