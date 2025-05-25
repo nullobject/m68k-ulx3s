@@ -1,15 +1,14 @@
 // TODO:
-// * Add framebuffer dual-port RAM
-// * Add intial reset states
-// * Change idle state to wait for a start signal
-// * When start signal is received, write framebuffer to OLED
-// * Send the set row/col commands by appending them to the ROM. Store the
-// offsets in a localparam and play the sequence of bytes before writing to
-// VRAM.
+// * Perform boot sequence on reset
+// * Enter IDLE state and wait for a start signal
+// * When start signal is received, sent commands and frame buffer to the OLED
+// * Return to the IDLE state
 module oled (
-    input  clk,
-    input  rst,
-    output done,
+    input clk,
+    input rst,
+
+    input  start,
+    output ready,
 
     // VRAM
     output reg [12:0] vram_addr,
@@ -25,7 +24,7 @@ module oled (
     output reg [7:0] oled_dout
 );
 
-  localparam OLED_ROM_SIZE = 64;
+  localparam OLED_ROM_SIZE = 43;
 
   // states
   localparam IDLE = 0;
@@ -36,25 +35,27 @@ module oled (
   localparam LATCH_DATA = 5;
   localparam DONE = 6;
 
-  reg  [6:0] addr;
-  reg  [2:0] state;
-  reg  [5:0] counter;
-  wire [7:0] rom_dout;
+  reg [2:0] state;
+  reg [13:0] addr;
+  reg [13:0] counter;
+  reg blit;
+  wire [7:0] rom_q;
 
   assign vram_addr = 0;
-  assign oled_rst = !rst;
-  assign done = addr == OLED_ROM_SIZE - 1;
+  assign oled_rst  = !rst;
+  wire done = addr == OLED_ROM_SIZE - 1;
+  assign ready = state == IDLE;
 
-  function [5:0] arity(input reg [7:0] cmd);
+  function [13:0] arity(input reg [7:0] cmd);
     case (cmd)
-      8'h15:   arity = 2;
-      8'h5C:   arity = 20;
-      8'h75:   arity = 2;
-      8'hA0:   arity = 2;
-      8'hAE:   arity = 0;
-      8'hAF:   arity = 0;
-      8'hB4:   arity = 2;
-      8'hD1:   arity = 2;
+      'h15: arity = 2;
+      'h5C: arity = 8192;
+      'h75: arity = 2;
+      'hA0: arity = 2;
+      'hAE: arity = 0;
+      'hAF: arity = 0;
+      'hB4: arity = 2;
+      'hD1: arity = 2;
       default: arity = 1;
     endcase
   endfunction
@@ -73,15 +74,16 @@ module oled (
           oled_cs <= 0;
         end
         LOAD_COUNTER: begin
-          state   <= LOAD_COMMAND;
-          counter <= arity(rom_dout);
+          state <= LOAD_COMMAND;
+          counter <= arity(rom_q);
+          blit <= rom_q == 8'h5C;
         end
         LOAD_COMMAND: begin
           state <= LATCH_COMMAND;
-          addr <= addr + 1;
-          oled_dc <= 0;
+          addr <= blit ? 0 : addr + 1;
           oled_e <= 1;
-          oled_dout <= rom_dout;
+          oled_dc <= 0;
+          oled_dout <= rom_q;
         end
         LATCH_COMMAND: begin
           state  <= done ? DONE : counter > 0 ? LOAD_DATA : LOAD_COUNTER;
@@ -93,7 +95,7 @@ module oled (
           counter <= counter - 1;
           oled_e <= 1;
           oled_dc <= 1;
-          oled_dout <= rom_dout;
+          oled_dout <= blit ? vram_q : rom_q;
         end
         LATCH_DATA: begin
           state  <= done ? DONE : counter > 0 ? LOAD_DATA : LOAD_COUNTER;
@@ -108,15 +110,15 @@ module oled (
     end
   end
 
-  // Initialization ROM for the OLED display
+  // Command ROM for the SSD1322 OLED display
   rom #(
       .MEM_INIT_FILE("rom/oled.hex"),
-      .DEPTH(OLED_ROM_SIZE),
+      .DEPTH(64),
       .DATA_WIDTH(8)
   ) oled_rom (
       .clk (clk),
       .addr(addr[5:0]),
-      .dout(rom_dout)
+      .dout(rom_q)
   );
 
 endmodule

@@ -41,7 +41,7 @@ void start(void) {
   }
 }
 
-void __attribute__((noreturn)) main(void) {
+int __attribute__((noreturn)) main(void) {
   asm("dc.l 0x2000"); // Set stack to top of RAM
   asm("dc.l start");
   __builtin_unreachable();

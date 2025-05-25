@@ -19,6 +19,12 @@ module gpu (
   wire [12:0] vram_addr_b;
   wire [ 7:0] vram_q_b;
 
+  always @(posedge clk, posedge rst) begin
+    if (rst) begin
+      state <= BOOT;
+    end
+  end
+
   dual_port_ram #(
       .DEPTH_A(16384),
       .DEPTH_B(8192),
