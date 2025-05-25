@@ -16,7 +16,8 @@ wire [15:0] cpu_dout;
 wire [15:0] cpu_din;
 wire [15:0] rom_dout;
 wire [15:0] ram_dout;
-wire [7:0] acia_dout;
+wire [ 7:0] acia_dout;
+wire [ 3:0] vram_dout;
 
 wire cpu_rw;    // read = 1, write = 0
 wire cpu_as_n;  // address strobe
@@ -172,7 +173,8 @@ gpu gpu (
   .rst(!rst_n),
   .vram_wr(vram_cs && !cpu_rw),
   .vram_addr(cpu_addr[14:1]),
-  .vram_data(cpu_dout[7:0]),
+  .vram_data(cpu_dout[3:0]),
+  .vram_q(vram_dout),
   .oled_cs(gp[0]),
   .oled_rst(gp[1]),
   .oled_e(gp[2]),

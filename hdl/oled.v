@@ -7,7 +7,6 @@ module oled (
     input clk,
     input rst,
 
-    input  start,
     output ready,
 
     // VRAM
@@ -24,6 +23,7 @@ module oled (
     output reg [7:0] oled_dout
 );
 
+  // TODO: This is the init sequence length, not the ROM size
   localparam OLED_ROM_SIZE = 43;
 
   // states

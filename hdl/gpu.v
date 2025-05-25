@@ -1,12 +1,15 @@
+/**
+ * Renders primitives to a framebuffer.
+ */
 module gpu (
-    input  clk,
-    input  rst,
-    output done,
+    input clk,
+    input rst,
 
     // VRAM
-    input        vram_wr,
-    input [13:0] vram_addr,
-    input [ 3:0] vram_data,
+    input         vram_wr,
+    input  [13:0] vram_addr,
+    input  [ 3:0] vram_data,
+    output [ 3:0] vram_q,
 
     // OLED
     output       oled_cs,
@@ -29,10 +32,17 @@ module gpu (
       .DEPTH_A(16384),
       .DEPTH_B(8192),
   ) vram (
-      .clk(clk),
+      // port A
+      .clk_a(clk),
+      .en_a(1),
       .wr_a(vram_wr),
       .addr_a(vram_addr),
       .data_a(vram_data),
+      .q_a(vram_q),
+
+      // port B
+      .clk_b(clk),
+      .en_b(1),
       .addr_b(vram_addr_b),
       .q_b(vram_q_b)
   );
