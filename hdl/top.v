@@ -177,8 +177,8 @@ gpu gpu (
   .vram_q(vram_dout),
   .oled_cs(gp[0]),
   .oled_rst(gp[1]),
-  .oled_e(gp[2]),
   .oled_dc(gp[3]),
+  .oled_e(gp[2]),
   .oled_dout(gn)
 );
 

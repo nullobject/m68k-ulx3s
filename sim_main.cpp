@@ -15,9 +15,9 @@ int main(int argc, char **argv) {
   vluint64_t time = 0;
 
   dut->clk = 0;
-  dut->rst = 0;
 
-  while (!dut->done) {
+  while (time < 1000) {
+    dut->rst = time < 4;
     dut->clk = !dut->clk;
     dut->eval();
     m_trace->dump(time);

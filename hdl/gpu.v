@@ -14,19 +14,13 @@ module gpu (
     // OLED
     output       oled_cs,
     output       oled_rst,
-    output       oled_e,
     output       oled_dc,
+    output       oled_e,
     output [7:0] oled_dout
 );
 
   wire [12:0] vram_addr_b;
   wire [ 7:0] vram_q_b;
-
-  always @(posedge clk, posedge rst) begin
-    if (rst) begin
-      state <= BOOT;
-    end
-  end
 
   dual_port_ram #(
       .DEPTH_A(16384),
@@ -54,8 +48,8 @@ module gpu (
       .vram_q(vram_q_b),
       .oled_cs(oled_cs),
       .oled_rst(oled_rst),
-      .oled_e(oled_e),
       .oled_dc(oled_dc),
+      .oled_e(oled_e),
       .oled_dout(oled_dout)
   );
 
