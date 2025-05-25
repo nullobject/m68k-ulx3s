@@ -1,3 +1,4 @@
+*.gtkw
 *.vcd
 build
 obj_dir

@@ -155,7 +155,6 @@ module oled_tx (
       case (state)
         IDLE: begin
           if (start) state <= LOAD_COMMAND;
-          oled_e <= 1;
         end
         LOAD_COMMAND: begin
           state   <= LATCH_COMMAND;
