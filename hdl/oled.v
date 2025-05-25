@@ -53,6 +53,7 @@ module oled (
     end else begin
       case (state)
         IDLE: begin
+          // TODO
         end
         INIT: begin
           state <= INIT_START;
@@ -111,9 +112,9 @@ module oled_tx (
     input [7:0] data,
 
     // OLED
-    output reg       oled_dc,
-    output reg       oled_e,
-    output     [7:0] oled_dout
+    output reg oled_dc,
+    output reg oled_e,
+    output [7:0] oled_dout
 );
 
   // states
