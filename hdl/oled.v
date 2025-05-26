@@ -84,7 +84,7 @@ module oled (
 
   // ROM containing initialisation sequence for the OLED display
   rom #(
-      .MEM_INIT_FILE("./oled.hex"),
+      .MEM_INIT_FILE("rom/oled.hex"),
       .DEPTH(64),
       .DATA_WIDTH(8)
   ) oled_rom (

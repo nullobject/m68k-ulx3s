@@ -129,7 +129,7 @@ fx68k m68k (
 
 // ROM
 rom #(
-  .MEM_INIT_FILE("../build/rom.hex"),
+  .MEM_INIT_FILE("build/rom.hex"),
   .DEPTH(2048)
 ) prog_rom (
   .clk(clk_25mhz),
