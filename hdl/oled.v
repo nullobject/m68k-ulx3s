@@ -20,10 +20,10 @@ module oled (
 );
 
   // states
-  localparam IDLE = 0;
-  localparam INIT = 1;
-  localparam INIT_START = 2;
-  localparam INIT_WAIT = 3;
+  localparam INIT = 0;
+  localparam INIT_START = 1;
+  localparam INIT_WAIT = 2;
+  localparam IDLE = 3;
 
   reg [2:0] state;
   reg [13:0] addr;
@@ -36,7 +36,7 @@ module oled (
 
   assign ready = state == IDLE;
   assign vram_addr = addr;
-  assign oled_cs = state == IDLE;
+  assign oled_cs = state == INIT || state == IDLE;
   assign oled_rst = !rst;
 
   always @(posedge clk, posedge rst) begin
@@ -52,12 +52,8 @@ module oled (
       state <= INIT;
     end else begin
       case (state)
-        IDLE: begin
-          // TODO
-        end
         INIT: begin
           state <= INIT_START;
-          addr <= 0;
           addr_end <= 47;
         end
         INIT_START: begin
@@ -88,7 +84,7 @@ module oled (
 
   // ROM containing initialisation sequence for the OLED display
   rom #(
-      .MEM_INIT_FILE("rom/oled.hex"),
+      .MEM_INIT_FILE("./oled.hex"),
       .DEPTH(64),
       .DATA_WIDTH(8)
   ) oled_rom (

@@ -19,6 +19,7 @@ wire [15:0] ram_dout;
 wire [ 7:0] acia_dout;
 wire [ 3:0] vram_dout;
 
+wire reset_n;
 wire cpu_rw;    // read = 1, write = 0
 wire cpu_as_n;  // address strobe
 wire cpu_lds_n; // lower byte
@@ -43,7 +44,7 @@ wire vram_cs = cpu_addr[15:14] == 1;
 reg rst_n = 0;
 
 always @(posedge clk_25mhz)
-  rst_n <= 1;
+  rst_n <= btn[0];
 
 // DTACK
 reg dtack_n; // Data transfer ack (always ready)
@@ -93,7 +94,7 @@ fx68k m68k (
   // clock/reset
   .clk(clk_25mhz),
   .HALTn(1'b1),
-  .extReset(!rst_n || !btn[0]),
+  .extReset(!rst_n),
   .pwrUp(!rst_n),
   .enPhi1(fx68_phi1),
   .enPhi2(fx68_phi2),
