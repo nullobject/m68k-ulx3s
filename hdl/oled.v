@@ -21,8 +21,8 @@ module oled (
 
   // states
   localparam INIT = 0;
-  localparam INIT_START = 1;
-  localparam INIT_WAIT = 2;
+  localparam SEND_COMMAND = 1;
+  localparam WAIT = 2;
   localparam IDLE = 3;
 
   reg [2:0] state;
@@ -30,9 +30,10 @@ module oled (
   reg [13:0] addr_end;
 
   wire [7:0] rom_q;
-  wire start = state == INIT_START;
+  wire start = state == SEND_COMMAND;
   wire tx_ready;
   wire next;
+  wire done = addr == addr_end;
 
   assign ready = state == IDLE;
   assign vram_addr = addr;
@@ -53,16 +54,16 @@ module oled (
     end else begin
       case (state)
         INIT: begin
-          state <= INIT_START;
+          state <= SEND_COMMAND;
           addr_end <= 47;
         end
-        INIT_START: begin
-          state <= INIT_WAIT;
+        SEND_COMMAND: begin
+          state <= WAIT;
         end
-        INIT_WAIT: begin
+        WAIT: begin
           if (tx_ready) begin
-            if (addr == addr_end) state <= IDLE;
-            else state <= INIT_START;
+            if (done) state <= IDLE;
+            else state <= SEND_COMMAND;
           end
         end
         default: state <= IDLE;
