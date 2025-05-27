@@ -21,19 +21,20 @@ module oled (
 
   // states
   localparam INIT = 0;
-  localparam SEND_COMMAND = 1;
-  localparam WAIT = 2;
-  localparam IDLE = 3;
+  localparam IDLE = 1;
+  localparam BLIT = 2;
+  localparam SEND_COMMAND = 3;
+  localparam WAIT = 4;
 
   reg [2:0] state;
   reg [13:0] addr;
-  reg [13:0] addr_end;
+  reg [13:0] counter;
+  // reg oled_dc_reg;
 
   wire [7:0] rom_q;
   wire start = state == SEND_COMMAND;
   wire tx_ready;
   wire next;
-  wire done = addr == addr_end;
 
   assign ready = state == IDLE;
   assign vram_addr = addr;
@@ -43,8 +44,11 @@ module oled (
   always @(posedge clk, posedge rst) begin
     if (rst) begin
       addr <= 0;
+      // oled_dc_reg <= oled_dc;
     end else begin
       if (next) addr <= addr + 1;
+      // TODO:: if NEXT and rising edge on DC and STATE is BLIT
+      // addr <= 'h2000;
     end
   end
 
@@ -54,19 +58,24 @@ module oled (
     end else begin
       case (state)
         INIT: begin
-          state <= SEND_COMMAND;
-          addr_end <= 47;
+          state   <= SEND_COMMAND;
+          counter <= 18;
+        end
+        BLIT: begin
+          // state   <= SEND_COMMAND;
+          // counter <= 3;
         end
         SEND_COMMAND: begin
-          state <= WAIT;
+          state   <= WAIT;
+          counter <= counter - 1;
         end
         WAIT: begin
           if (tx_ready) begin
-            if (done) state <= IDLE;
+            if (counter == 0) state <= IDLE;
             else state <= SEND_COMMAND;
           end
         end
-        default: state <= IDLE;
+        default: state <= BLIT;
       endcase
     end
   end
