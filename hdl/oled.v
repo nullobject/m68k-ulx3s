@@ -6,10 +6,8 @@ module oled (
 
     output ready,
 
-    output [13:0] vram_addr,
-    /* verilator lint_off UNUSEDSIGNAL */
+    output [12:0] vram_addr,
     input  [ 7:0] vram_q,
-    /* verilator lint_on UNUSEDSIGNAL */
 
     // OLED
     output       oled_cs,
@@ -27,30 +25,21 @@ module oled (
   localparam WAIT = 4;
 
   reg [2:0] state;
+  reg [4:0] counter;
   reg [13:0] addr;
-  reg [13:0] counter;
-  // reg oled_dc_reg;
 
   wire [7:0] rom_q;
+  wire [7:0] tx_data;
   wire start = state == SEND_COMMAND;
-  wire tx_ready;
   wire next;
+  wire tx_ready;
+  wire vram_cs = addr[13];
 
   assign ready = state == IDLE;
-  assign vram_addr = addr;
+  assign vram_addr = addr[12:0];
   assign oled_cs = state == INIT || state == IDLE;
   assign oled_rst = !rst;
-
-  always @(posedge clk, posedge rst) begin
-    if (rst) begin
-      addr <= 0;
-      // oled_dc_reg <= oled_dc;
-    end else begin
-      if (next) addr <= addr + 1;
-      // TODO:: if NEXT and rising edge on DC and STATE is BLIT
-      // addr <= 'h2000;
-    end
-  end
+  assign tx_data = vram_cs ? vram_q : rom_q;
 
   always @(posedge clk, posedge rst) begin
     if (rst) begin
@@ -60,19 +49,23 @@ module oled (
         INIT: begin
           state   <= SEND_COMMAND;
           counter <= 18;
+          addr    <= 0;
         end
         BLIT: begin
-          // state   <= SEND_COMMAND;
-          // counter <= 3;
+          state   <= SEND_COMMAND;
+          counter <= 3;
+          addr    <= 'h39;
         end
         SEND_COMMAND: begin
           state   <= WAIT;
           counter <= counter - 1;
         end
         WAIT: begin
+          if (next) begin
+            addr <= addr == 'h3f ? 'h2000 : addr + 1;
+          end
           if (tx_ready) begin
-            if (counter == 0) state <= IDLE;
-            else state <= SEND_COMMAND;
+            state <= counter == 0 ? IDLE : SEND_COMMAND;
           end
         end
         default: state <= BLIT;
@@ -86,7 +79,7 @@ module oled (
       .start(start),
       .ready(tx_ready),
       .next(next),
-      .data(rom_q),
+      .data(tx_data),
       .oled_dc(oled_dc),
       .oled_e(oled_e),
       .oled_dout(oled_dout)
@@ -140,8 +133,7 @@ module oled_tx (
   function [13:0] arity(input reg [7:0] cmd);
     case (cmd)
       'h15: arity = 2;
-      // 'h5C: arity = 8192;
-      'h5C: arity = 4;
+      'h5C: arity = 8192;
       'h75: arity = 2;
       'hA0: arity = 2;
       'hAE: arity = 0;

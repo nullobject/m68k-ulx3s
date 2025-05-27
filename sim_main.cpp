@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 
   dut->clk = 0;
 
-  while (time < 1000) {
+  while (time < 100000) {
     dut->rst = time < 4;
     dut->clk = !dut->clk;
     dut->eval();
