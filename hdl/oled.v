@@ -4,8 +4,6 @@ module oled (
     input clk,
     input rst,
 
-    output ready,
-
     output [12:0] vram_addr,
     input  [ 7:0] vram_q,
 
@@ -29,17 +27,16 @@ module oled (
   reg [13:0] addr;
   reg vram_cs;
 
-  wire [7:0] rom_q;
-  wire [7:0] tx_data;
   wire start = state == SEND_COMMAND;
+  wire ready;
   wire next;
-  wire tx_ready;
+  wire [7:0] data;
+  wire [7:0] rom_q;
 
-  assign ready = state == IDLE;
   assign vram_addr = addr[12:0];
   assign oled_cs = state == INIT || state == IDLE;
   assign oled_rst = !rst;
-  assign tx_data = vram_cs ? vram_q : rom_q;
+  assign data = vram_cs ? vram_q : rom_q;
 
   always @(posedge clk, posedge rst) begin
     if (rst) begin
@@ -66,7 +63,7 @@ module oled (
           if (next) begin
             addr <= addr == 'h3f ? 'h2000 : addr + 1;
           end
-          if (tx_ready) begin
+          if (ready) begin
             state <= counter == 0 ? IDLE : SEND_COMMAND;
           end
         end
@@ -79,9 +76,9 @@ module oled (
       .clk(clk),
       .rst(rst),
       .start(start),
-      .ready(tx_ready),
+      .ready(ready),
       .next(next),
-      .data(tx_data),
+      .data(data),
       .oled_dc(oled_dc),
       .oled_e(oled_e),
       .oled_dout(oled_dout)
