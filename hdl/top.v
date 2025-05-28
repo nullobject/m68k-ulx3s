@@ -19,7 +19,6 @@ wire [15:0] ram_dout;
 wire [ 7:0] acia_dout;
 wire [ 3:0] vram_dout;
 
-wire reset_n;
 wire cpu_rw;    // read = 1, write = 0
 wire cpu_as_n;  // address strobe
 wire cpu_lds_n; // lower byte
@@ -28,17 +27,32 @@ wire cpu_E;     // peripheral enable
 wire vma_n;     // valid memory address
 wire vpa_n;     // valid peripheral address
 
-// address 0x2000 to 0x3fff used for peripherals
-assign vpa_n = !(cpu_addr[15:12] > 1) | cpu_as_n;
+// address 0x4000 to 0xffff used for peripherals
+assign vpa_n = !(cpu_addr[15:12] >= 4) | cpu_as_n;
+
+// wire ram_cs = cpu_addr[15:12] == 1;
+// wire vram_cs = cpu_addr[15:14] == 1;
+// wire led_cs = !vma_n && cpu_addr[15:12] == 2;
+// wire acia_cs = !vma_n && cpu_addr[15:12] == 3;
 
 // chip select
-wire ram_cs = cpu_addr[15:12] == 1;
-wire led_cs = !vma_n && cpu_addr[15:12] == 2;
-wire acia_cs = !vma_n && cpu_addr[15:12] == 3;
-wire gpio_cs = !vma_n && cpu_addr[15:12] == 4;
-wire gpio_a_cs = gpio_cs && cpu_addr[1] == 0;
-wire gpio_b_cs = gpio_cs && cpu_addr[1] == 1;
-wire vram_cs = cpu_addr[15:14] == 1;
+//
+// 0000-0FFF ROM
+// 1000-1FFF RAM
+// 2000-3FFF VRAM
+// 4000      ACIA
+// 5000      LED
+always @(addr) begin
+  {ram_cs, vram_cs, acia_cs, led_cs} = 0;
+  casez (cpu_addr[15:12])
+    4'b0001: ram_cs = 1;
+    4'b001?: vram_cs = 1;
+    4'b0100: acia_cs = 1;
+    4'b0101: led_cs = 1;
+    default: {ram_cs, vram_cs, acia_cs, led_cs} = 0;
+  endcase
+end
+
 
 // reset
 reg rst_n = 0;
@@ -55,14 +69,6 @@ always @(posedge clk_25mhz)
 // LED
 always @(posedge clk_25mhz)
   if (led_cs && !cpu_rw) led <= cpu_dout;
-
-// GPIO
-// always @(posedge clk_25mhz) begin
-//   if (!cpu_rw) begin
-//     if (gpio_a_cs) gp <= cpu_dout;
-//     if (gpio_b_cs) gn <= cpu_dout;
-//   end
-// end
 
 // baud clock
 reg [7:0] baud_cnt = 0;
@@ -84,11 +90,11 @@ always @(posedge clk_25mhz) begin
 end
 
 // decode CPU input data bus
-assign cpu_din = acia_cs ? {acia_dout, 8'h0} :
-  (gpio_a_cs ? {gp, 8'h0} :
-  (gpio_b_cs ? {gn, 8'h0} :
-  (ram_cs ? ram_dout :
-  rom_dout)));
+assign cpu_din =
+  acia_cs ? {acia_dout, 8'h0} :
+  vram_cs ? vram_dout :
+  ram_cs ? ram_dout :
+  rom_dout;
 
 fx68k m68k (
   // clock/reset
@@ -173,8 +179,8 @@ gpu gpu (
   .clk(clk_25mhz),
   .rst(!rst_n),
   .vram_wr(vram_cs && !cpu_rw),
-  .vram_addr(cpu_addr[14:1]),
-  .vram_data(cpu_dout[3:0]),
+  .vram_addr(cpu_addr[13:1]),
+  .vram_data(cpu_dout[7:0]),
   .vram_q(vram_dout),
   .oled_cs(gp[0]),
   .oled_rst(gp[1]),

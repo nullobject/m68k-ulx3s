@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
-[*] Tue May 27 10:38:11 2025
+[*] Wed May 28 10:10:01 2025
 [*]
 [dumpfile] "/home/josh/src/ulx3s/m68k-ulx3s/waveform.vcd"
-[dumpfile_mtime] "Tue May 27 10:31:51 2025"
-[dumpfile_size] 3422397
+[dumpfile_mtime] "Wed May 28 10:08:40 2025"
+[dumpfile_size] 3420105
 [savefile] "/home/josh/src/ulx3s/m68k-ulx3s/oled.gtkw"
-[timestart] 33001
-[size] 2262 1390
-[pos] 199 460
-*-2.914123 33028 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[timestart] 228
+[size] 1886 2045
+[pos] -1 -1
+*-3.514123 33028 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.oled.
 [sst_width] 297
@@ -23,16 +23,19 @@ TOP.oled.rst
 TOP.oled.state[2:0]
 @22
 TOP.oled.addr[13:0]
+@28
+TOP.oled.vram_cs
+@22
 [color] 3
 TOP.oled.oled_dout[7:0]
 @28
+[color] 1
+TOP.oled.oled_e
 [color] 7
 TOP.oled.oled_cs
 [color] 7
 TOP.oled.oled_rst
 [color] 7
 TOP.oled.oled_dc
-[color] 7
-TOP.oled.oled_e
 [pattern_trace] 1
 [pattern_trace] 0

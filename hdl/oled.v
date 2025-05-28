@@ -27,13 +27,13 @@ module oled (
   reg [2:0] state;
   reg [4:0] counter;
   reg [13:0] addr;
+  reg vram_cs;
 
   wire [7:0] rom_q;
   wire [7:0] tx_data;
   wire start = state == SEND_COMMAND;
   wire next;
   wire tx_ready;
-  wire vram_cs = addr[13];
 
   assign ready = state == IDLE;
   assign vram_addr = addr[12:0];
@@ -43,8 +43,10 @@ module oled (
 
   always @(posedge clk, posedge rst) begin
     if (rst) begin
-      state <= INIT;
+      state   <= INIT;
+      vram_cs <= 0;
     end else begin
+      vram_cs <= addr[13];
       case (state)
         INIT: begin
           state   <= SEND_COMMAND;

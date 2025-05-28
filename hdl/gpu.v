@@ -7,7 +7,7 @@ module gpu (
 
     // VRAM
     input         vram_wr,
-    input  [13:0] vram_addr,
+    input  [12:0] vram_addr,
     input  [ 3:0] vram_data,
     output [ 3:0] vram_q,
 
@@ -23,7 +23,7 @@ module gpu (
   wire [ 7:0] vram_q_b;
 
   dual_port_ram #(
-      .DEPTH_A(16384),
+      .DEPTH_A(8192),
       .DEPTH_B(8192),
   ) vram (
       // port A
@@ -41,11 +41,14 @@ module gpu (
       .q_b(vram_q_b)
   );
 
+  wire [7:0] data = vram_addr_b[2:0] == 0 ? 'hFF : 'h0;
+
   oled oled (
       .clk(clk),
       .rst(rst),
       .vram_addr(vram_addr_b),
-      .vram_q(vram_q_b),
+      // .vram_q(vram_q_b),
+      .vram_q(data),
       .oled_cs(oled_cs),
       .oled_rst(oled_rst),
       .oled_dc(oled_dc),
