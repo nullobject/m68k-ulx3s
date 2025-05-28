@@ -1,11 +1,19 @@
 /* verilator lint_off DECLFILENAME */
 
+/**
+ * A controller for OLED displays using the SSD1322 driver.
+ *
+ * On reset, it begins the initialisation sequence to configure the OLED
+ * display. After the display has been initiaised, the controller continually
+ * copies the contents of the framebuffer to the display.
+ */
 module oled (
     input clk,
     input rst,
 
-    output [12:0] vram_addr,
-    input  [ 7:0] vram_q,
+    // framebuffer
+    output [12:0] framebuffer_addr,
+    input  [ 7:0] framebuffer_q,
 
     // OLED
     output       oled_cs,
@@ -25,7 +33,7 @@ module oled (
   reg [2:0] state;
   reg [4:0] counter;
   reg [13:0] addr;
-  reg vram_cs;
+  reg framebuffer_cs;
 
   wire start = state == SEND_COMMAND;
   wire ready;
@@ -33,17 +41,17 @@ module oled (
   wire [7:0] data;
   wire [7:0] rom_q;
 
-  assign vram_addr = addr[12:0];
+  assign framebuffer_addr = addr[12:0];
   assign oled_cs = state == INIT || state == IDLE;
   assign oled_rst = !rst;
-  assign data = vram_cs ? vram_q : rom_q;
+  assign data = framebuffer_cs ? framebuffer_q : rom_q;
 
   always @(posedge clk, posedge rst) begin
     if (rst) begin
-      state   <= INIT;
-      vram_cs <= 0;
+      state <= INIT;
+      framebuffer_cs <= 0;
     end else begin
-      vram_cs <= addr[13];
+      framebuffer_cs <= addr[13];
       case (state)
         INIT: begin
           state   <= SEND_COMMAND;
