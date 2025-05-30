@@ -1,5 +1,7 @@
 #include <stdint.h>
 
+#include "tiles.h"
+
 #define FRAMEBUFFER (uint16_t *)0x2000
 
 void delay(int d) {
@@ -9,9 +11,18 @@ void delay(int d) {
 }
 
 void start(void) {
+  uint16_t *p;
   while (1) {
-    for (uint16_t *i = FRAMEBUFFER; i < (uint16_t *)0x4000; i++)
-      *i = 0xFFFF;
+    p = FRAMEBUFFER;
+
+    for (uint16_t i = 0; i < 8; i++) {
+      for (uint16_t j = 0; j < 2; j++) {
+        uint16_t offset = 0x400;
+        uint16_t index1 = (i << 6) + j;
+        uint16_t index2 = (i << 2) + (j << 1);
+        p[index1] = (tiles[offset + index2 + 1] << 8) + tiles[offset + index2];
+      }
+    }
 
     delay(100000);
 
