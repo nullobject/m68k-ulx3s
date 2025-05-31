@@ -1,6 +1,8 @@
 module layer_processor (
     input clk,
 
+    output [ 7:0] ram_addr,
+    input  [15:0] ram_data,
     input  [12:0] pixel_addr,
     output [ 7:0] pixel_data
 );

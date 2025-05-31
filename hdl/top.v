@@ -16,6 +16,7 @@ wire [15:0] cpu_dout;
 wire [15:0] cpu_din;
 wire [15:0] rom_dout;
 wire [15:0] ram_dout;
+wire [15:0] char_ram_dout;
 wire [15:0] framebuffer_dout;
 wire [ 7:0] acia_dout;
 
@@ -28,31 +29,27 @@ wire vma_n;     // valid memory address
 wire vpa_n;     // valid peripheral address
 
 // address 0x4000 to 0xffff used for peripherals
-assign vpa_n = !(cpu_addr[15:12] >= 4) | cpu_as_n;
-
-// wire ram_cs = cpu_addr[15:12] == 1;
-// wire framebuffer_cs = cpu_addr[15:14] == 1;
-// wire led_cs = !vma_n && cpu_addr[15:12] == 2;
-// wire acia_cs = !vma_n && cpu_addr[15:12] == 3;
+assign vpa_n = !(cpu_addr[15:12] >= 5) | cpu_as_n;
 
 // chip select
 //
 // 0000-0FFF ROM
 // 1000-1FFF RAM
-// 2000-3FFF framebuffer
-// 4000      ACIA
-// 5000      LED
+// 2000-3FFF FRAMEBUFFER
+// 4000-4100 CHAR RAM
+// 5000      ACIA
+// 6000      LED
 always @(addr) begin
-  {ram_cs, framebuffer_cs, acia_cs, led_cs} = 0;
+  {ram_cs, char_ram_cs, framebuffer_cs, acia_cs, led_cs} = 0;
   casez (cpu_addr[15:12])
     4'b0001: ram_cs = 1;
     4'b001?: framebuffer_cs = 1;
-    4'b0100: acia_cs = 1;
-    4'b0101: led_cs = 1;
-    default: {ram_cs, framebuffer_cs, acia_cs, led_cs} = 0;
+    4'b0100: char_ram_cs = 1;
+    4'b0101: acia_cs = 1;
+    4'b0110: led_cs = 1;
+    default: {ram_cs, char_ram_cs, framebuffer_cs, acia_cs, led_cs} = 0;
   endcase
 end
-
 
 // reset
 reg rst_n = 0;
@@ -93,6 +90,7 @@ end
 assign cpu_din =
   acia_cs ? {acia_dout, 8'h0} :
   framebuffer_cs ? framebuffer_dout :
+  char_ram_cs ? char_ram_dout :
   ram_cs ? ram_dout :
   rom_dout;
 
@@ -178,6 +176,11 @@ acia uart (
 gpu gpu (
   .clk(clk_25mhz),
   .rst(!rst_n),
+  .char_ram_wr(char_ram_cs && !cpu_rw),
+  .char_ram_mask({!cpu_uds_n, !cpu_lds_n}),
+  .char_ram_addr(cpu_addr[8:1]),
+  .char_ram_data(cpu_dout),
+  .char_ram_q(char_ram_dout),
   .framebuffer_wr(framebuffer_cs && !cpu_rw),
   .framebuffer_mask({!cpu_uds_n, !cpu_lds_n}),
   .framebuffer_addr(cpu_addr[12:1]),
