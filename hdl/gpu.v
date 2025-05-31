@@ -34,10 +34,7 @@ module gpu (
   wire [12:0] pixel_addr;
   wire [ 7:0] pixel_data = framebuffer_q_b | char_data;
 
-  dual_port_ram #(
-      .DEPTH_A(4096),
-      .DEPTH_B(8192)
-  ) framebuffer (
+  framebuffer framebuffer (
       .clk(clk),
 
       // port A

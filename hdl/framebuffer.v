@@ -1,6 +1,6 @@
-module dual_port_ram #(
-    parameter DEPTH_A = 16384,
-    parameter DEPTH_B = 16384,
+module framebuffer #(
+    parameter DEPTH_A = 4096,
+    parameter DEPTH_B = 8192,
     parameter ADDRESS_WIDTH_A = $clog2(DEPTH_A),
     parameter ADDRESS_WIDTH_B = $clog2(DEPTH_B)
 ) (
@@ -15,7 +15,7 @@ module dual_port_ram #(
 
     // port B
     input [ADDRESS_WIDTH_B-1:0] addr_b,
-    output reg [15:0] q_b
+    output reg [7:0] q_b
 );
 
   reg [7:0] ram_hi[0:DEPTH_A-1];
@@ -27,7 +27,7 @@ module dual_port_ram #(
       if (mask_a[0]) ram_lo[addr_a] <= data_a[7:0];
     end
     q_a <= {ram_hi[addr_a], ram_lo[addr_a]};
-    q_b <= {ram_hi[addr_b], ram_lo[addr_b]};
+    q_b <= addr_b[0] ? ram_hi[addr_b[ADDRESS_WIDTH_B-1:1]] : ram_lo[addr_b[ADDRESS_WIDTH_B-1:1]];
   end
 
 endmodule
