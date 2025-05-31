@@ -44,8 +44,8 @@ module gpu (
   oled oled (
       .clk(clk),
       .rst(rst),
-      .framebuffer_addr(framebuffer_addr_b),
-      .framebuffer_q(framebuffer_q_b),
+      .pixel_addr(framebuffer_addr_b),
+      .pixel_data(framebuffer_q_b),
       .oled_cs(oled_cs),
       .oled_rst(oled_rst),
       .oled_dc(oled_dc),

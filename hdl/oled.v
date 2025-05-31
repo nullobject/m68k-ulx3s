@@ -11,9 +11,9 @@ module oled (
     input clk,
     input rst,
 
-    // framebuffer
-    output [12:0] framebuffer_addr,
-    input  [ 7:0] framebuffer_q,
+    // pixel data
+    output [12:0] pixel_addr,
+    input  [ 7:0] pixel_data,
 
     // OLED
     output       oled_cs,
@@ -28,7 +28,7 @@ module oled (
   localparam IDLE = 1;
   localparam BLIT = 2;
   localparam SEND_COMMAND = 3;
-  localparam WAIT = 4;
+  localparam SEND_DATA = 4;
 
   reg [2:0] state;
   reg [4:0] counter;
@@ -41,10 +41,10 @@ module oled (
   wire [7:0] data;
   wire [7:0] rom_q;
 
-  assign framebuffer_addr = addr[12:0];
+  assign pixel_addr = addr[12:0];
   assign oled_cs = state == INIT || state == IDLE;
   assign oled_rst = !rst;
-  assign data = framebuffer_cs ? framebuffer_q : rom_q;
+  assign data = framebuffer_cs ? pixel_data : rom_q;
 
   always @(posedge clk, posedge rst) begin
     if (rst) begin
@@ -64,10 +64,10 @@ module oled (
           addr    <= 'h39;
         end
         SEND_COMMAND: begin
-          state   <= WAIT;
+          state   <= SEND_DATA;
           counter <= counter - 1;
         end
-        WAIT: begin
+        SEND_DATA: begin
           if (next) begin
             addr <= addr == 'h3f ? 'h2000 : addr + 1;
           end
