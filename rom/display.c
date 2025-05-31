@@ -2,34 +2,40 @@
 
 #include "tiles.h"
 
-#define FRAMEBUFFER (uint16_t *)0x2000
+#define FRAMEBUFFER ((uint16_t *)0x2000)
 
-void delay(int d) {
-  for (int i = 0; i < d; i++) {
+void delay(uint16_t d) {
+  for (uint16_t i = 0; i < d; i++) {
+    asm("nop");
+    asm("nop");
+    asm("nop");
+    asm("nop");
+    asm("nop");
+    asm("nop");
+    asm("nop");
     asm("nop");
   }
 }
 
 void start(void) {
-  uint16_t *p;
-  while (1) {
-    p = FRAMEBUFFER;
+  uint16_t tile_offset = 0x400;
 
+  while (1) {
     for (uint16_t i = 0; i < 8; i++) {
       for (uint16_t j = 0; j < 2; j++) {
-        uint16_t offset = 0x400;
-        uint16_t index1 = (i << 6) + j;
-        uint16_t index2 = (i << 2) + (j << 1);
-        p[index1] = (tiles[offset + index2 + 1] << 8) + tiles[offset + index2];
+        uint16_t fb_index = (i << 6) | j;
+        uint16_t tile_index = (i << 2) | (j << 1);
+        FRAMEBUFFER[fb_index] = (tiles[tile_offset + tile_index + 1] << 8) |
+                                tiles[tile_offset + tile_index];
       }
     }
 
-    delay(100000);
+    delay(65535);
 
     for (uint16_t *i = FRAMEBUFFER; i < (uint16_t *)0x4000; i++)
       *i = 0x0000;
 
-    delay(100000);
+    delay(65535);
   }
 }
 
