@@ -37,7 +37,7 @@ $(FAKE_HEX):
 
 $(PROG_BIN): $(PROG_C) rom/linker_script.ld
 	mkdir -p $(BUILDDIR)
-	m68k-linux-gnu-gcc -Wall -march=68000 -Os -fomit-frame-pointer -ffreestanding -nostdlib -nostartfiles -Wl,-Trom/linker_script.ld -o $@ $< rom/tiles.c
+	m68k-linux-gnu-gcc -Wall -march=68000 -Os -fomit-frame-pointer -ffreestanding -nostdlib -nostartfiles -Wl,-Trom/linker_script.ld -o $@ $<
 
 $(PROG_HEX): $(PROG_BIN)
 	hexdump -v -e '2/1 "%02X" "\n"' $< > $@
