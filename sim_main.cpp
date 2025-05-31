@@ -15,10 +15,13 @@ int main(int argc, char **argv) {
   vluint64_t time = 0;
 
   dut->clk = 0;
+  dut->pixel_data = 0;
 
   while (time < 100000) {
     dut->rst = time < 4;
     dut->clk = !dut->clk;
+    if (dut->clk)
+      dut->pixel_data = dut->pixel_addr;
     dut->eval();
     m_trace->dump(time);
     time++;
