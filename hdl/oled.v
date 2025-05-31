@@ -120,7 +120,7 @@ module oled_tx (
     // OLED
     output reg oled_dc,
     output reg oled_e,
-    output [7:0] oled_dout
+    output reg [7:0] oled_dout
 );
 
   // states
@@ -134,8 +134,7 @@ module oled_tx (
   reg [13:0] counter;
 
   assign ready = state == IDLE;
-  assign next = state == LATCH_COMMAND || state == LATCH_DATA;
-  assign oled_dout = data;
+  assign next  = state == LATCH_COMMAND || state == LATCH_DATA;
 
   function [13:0] arity(input reg [7:0] cmd);
     case (cmd)
@@ -150,6 +149,8 @@ module oled_tx (
       default: arity = 1;
     endcase
   endfunction
+
+  always @(negedge clk) oled_dout <= data;
 
   always @(posedge clk, posedge rst) begin
     if (rst) begin

@@ -43,7 +43,7 @@ module gpu (
       .q_b(framebuffer_b_q)
   );
 
-  layer_processor char (
+  layer_processor char_layer (
       .clk(clk),
       .pixel_addr(pixel_addr),
       .pixel_data(char_data)
