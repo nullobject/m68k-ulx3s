@@ -1,6 +1,7 @@
 #include <stdint.h>
 
 #define FRAMEBUFFER ((uint16_t *)0x2000)
+#define CHAR_RAM ((uint16_t *)0x4000)
 
 void delay(uint16_t d) {
   for (uint16_t i = 0; i < d; i++) {
@@ -16,6 +17,10 @@ void delay(uint16_t d) {
 }
 
 void start(void) {
+  for (uint16_t *i = CHAR_RAM; i < (uint16_t *)0x4010; i++) {
+    *i = 1;
+  }
+
   while (1) {
     for (uint16_t i = 0; i < 8; i++) {
       for (uint16_t j = 0; j < 2; j++) {

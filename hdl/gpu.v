@@ -50,8 +50,7 @@ module gpu (
   );
 
   dual_port_ram #(
-      .DEPTH_A(256),
-      .DEPTH_B(256)
+      .DEPTH(256)
   ) char_ram (
       .clk(clk),
 
