@@ -1,11 +1,11 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 
-#include "Voled.h"
+#include "Vgpu.h"
 
 int main(int argc, char **argv) {
   VerilatedContext *contextp = new VerilatedContext;
-  Voled *dut = new Voled{ contextp };
+  Vgpu *dut = new Vgpu{ contextp };
   contextp->traceEverOn(true);
   VerilatedVcdC *m_trace = new VerilatedVcdC;
   dut->trace(m_trace, 5);
@@ -15,13 +15,10 @@ int main(int argc, char **argv) {
   vluint64_t time = 0;
 
   dut->clk = 0;
-  dut->pixel_data = 0;
 
   while (time < 100000) {
     dut->rst = time < 4;
     dut->clk = !dut->clk;
-    if (dut->clk)
-      dut->pixel_data = dut->pixel_addr;
     dut->eval();
     m_trace->dump(time);
     time++;

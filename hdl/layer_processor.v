@@ -1,0 +1,35 @@
+module layer_processor (
+    input clk,
+
+    input [12:0] pixel_addr,
+    output reg [7:0] pixel_data
+);
+
+  // wire [ 3:0] row = pixel_addr[12:9];
+  // wire [ 4:0] col = pixel_addr[6:2];
+  wire [ 1:0] offset_y = pixel_addr[8:7];
+  wire [ 1:0] offset_x = pixel_addr[1:0];
+  wire [ 5:0] tile_code = 'h01;
+  wire [ 8:0] tile_rom_addr = {tile_code, offset_y, 1'b0};
+  wire [31:0] tile_rom_q;
+
+  always @(posedge clk) begin
+    case (offset_x)
+      0: pixel_data <= tile_rom_q[31:24];
+      1: pixel_data <= tile_rom_q[23:16];
+      2: pixel_data <= tile_rom_q[15:8];
+      3: pixel_data <= tile_rom_q[7:0];
+    endcase
+  end
+
+  rom #(
+      .MEM_INIT_FILE("rom/tiles.hex"),
+      .DEPTH(512),
+      .DATA_WIDTH(32)
+  ) oled_rom (
+      .clk (clk),
+      .addr(tile_rom_addr),
+      .dout(tile_rom_q)
+  );
+
+endmodule

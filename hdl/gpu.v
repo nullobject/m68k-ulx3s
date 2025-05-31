@@ -20,12 +20,14 @@ module gpu (
     output [7:0] oled_dout
 );
 
-  wire [12:0] framebuffer_addr_b;
-  wire [ 7:0] framebuffer_q_b;
+  wire [ 7:0] framebuffer_b_q;
+  wire [ 7:0] char_data;
+  wire [12:0] pixel_addr;
+  wire [ 7:0] pixel_data = framebuffer_b_q | char_data;
 
   dual_port_ram #(
       .DEPTH_A(4096),
-      .DEPTH_B(8192),
+      .DEPTH_B(8192)
   ) framebuffer (
       .clk(clk),
 
@@ -37,15 +39,21 @@ module gpu (
       .q_a(framebuffer_q),
 
       // port B
-      .addr_b(framebuffer_addr_b),
-      .q_b(framebuffer_q_b)
+      .addr_b(pixel_addr),
+      .q_b(framebuffer_b_q)
+  );
+
+  layer_processor char (
+      .clk(clk),
+      .pixel_addr(pixel_addr),
+      .pixel_data(char_data)
   );
 
   oled oled (
       .clk(clk),
       .rst(rst),
-      .pixel_addr(framebuffer_addr_b),
-      .pixel_data(framebuffer_q_b),
+      .pixel_addr(pixel_addr),
+      .pixel_data(pixel_data),
       .oled_cs(oled_cs),
       .oled_rst(oled_rst),
       .oled_dc(oled_dc),
