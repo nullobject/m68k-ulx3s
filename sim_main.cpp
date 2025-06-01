@@ -15,10 +15,20 @@ int main(int argc, char **argv) {
   vluint64_t time = 0;
 
   dut->clk = 0;
+  dut->char_ram_mask = 3;
 
-  while (time < 100000) {
+  int i = 0;
+
+  while (time < 1000000) {
     dut->rst = time < 4;
     dut->clk = !dut->clk;
+
+    dut->char_ram_wr = i < 64;
+    dut->char_ram_addr = i;
+    dut->char_ram_data = i;
+    if (dut->clk)
+      i++;
+
     dut->eval();
     m_trace->dump(time);
     time++;

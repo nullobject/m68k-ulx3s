@@ -41,7 +41,7 @@ module oled (
   wire [7:0] data;
   wire [7:0] rom_q;
 
-  assign pixel_addr = addr[12:0];
+  assign pixel_addr = addr[13] ? addr[12:0] : 'h7f;
   assign oled_cs = state == INIT || state == IDLE;
   assign oled_rst = !rst;
   assign data = framebuffer_cs ? pixel_data : rom_q;
