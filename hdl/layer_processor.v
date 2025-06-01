@@ -7,8 +7,8 @@ module layer_processor (
     input  [15:0] ram_data,
 
     // pixel data
-    input      [12:0] pixel_addr,
-    output reg [ 7:0] pixel_data
+    input  [12:0] pixel_addr,
+    output [ 7:0] pixel_data
 );
 
   reg [15:0] tile;
@@ -43,7 +43,7 @@ module layer_processor (
     if (offset_x == 3) tile <= ram_data;
   end
 
-  always @(clk) pixel_data <= tile_invert ? ~tile_rom_byte : tile_rom_byte;
+  assign pixel_data = tile_invert ? ~tile_rom_byte : tile_rom_byte;
 
   rom #(
       .MEM_INIT_FILE("rom/tiles.hex"),

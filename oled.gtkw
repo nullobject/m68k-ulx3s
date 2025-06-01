@@ -1,24 +1,25 @@
 [*]
 [*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
-[*] Sun Jun  1 09:24:39 2025
+[*] Sun Jun  1 11:20:27 2025
 [*]
 [dumpfile] "/home/josh/src/ulx3s/m68k-ulx3s/waveform.vcd"
-[dumpfile_mtime] "Sun Jun  1 09:22:44 2025"
-[dumpfile_size] 45701207
+[dumpfile_mtime] "Sun Jun  1 11:16:11 2025"
+[dumpfile_size] 46132842
 [savefile] "/home/josh/src/ulx3s/m68k-ulx3s/oled.gtkw"
-[timestart] 738
-[size] 2006 642
+[timestart] 4338
+[size] 2783 1751
 [pos] -1 -1
-*-3.814123 254 263 33074 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-2.314123 4360 263 33074 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [markername] AFRAME
 [markername] BFRAME
 [treeopen] TOP.
 [treeopen] TOP.gpu.
+[treeopen] TOP.gpu.char_layer.
 [treeopen] TOP.gpu.oled.
 [sst_width] 297
 [signals_width] 250
 [sst_expanded] 1
-[sst_vpaned_height] 209
+[sst_vpaned_height] 741
 @28
 TOP.clk
 TOP.rst
@@ -31,17 +32,15 @@ TOP.gpu.char_layer.offset_x[1:0]
 @22
 [color] 1
 TOP.gpu.oled.pixel_addr[12:0]
-[color] 1
-TOP.gpu.oled.pixel_data[7:0]
 [color] 7
 TOP.gpu.char_layer.ram_addr[7:0]
 [color] 7
 TOP.gpu.char_layer.ram_data[15:0]
 TOP.gpu.char_layer.tile_code[5:0]
 TOP.gpu.char_layer.tile_rom_addr[8:0]
-@23
 TOP.gpu.char_layer.tile_rom_dout[31:0]
-@22
+[color] 1
+TOP.gpu.oled.pixel_data[7:0]
 [color] 3
 TOP.gpu.framebuffer.addr_b[12:0]
 [color] 3
