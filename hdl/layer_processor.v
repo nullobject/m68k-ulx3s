@@ -20,13 +20,13 @@ module layer_processor (
   wire [ 8:0] tile_rom_addr = {tile_code, offset_y};
   wire [31:0] tile_rom_dout;
 
-  // We need to determine whether the next VRAM address should be for the next
-  // tile, or if we are looping back to the beginning of the current row while
-  // drawing the current row of tiles.
   assign ram_addr =
-    en == 0 ? 0 :
-    col == 31 && offset_y == 7 ? {row, col} + 1'h1 :
-    {row, col + 1'h1};
+      // load first tile
+      en == 0 ? 0 :
+      // load first tile in next row
+      col == 31 && offset_y == 7 ? {row + 1'h1, 5'h0} :
+      // load next tile in current row
+      {row, col + 1'h1};
 
   assign pixel_data =
       offset_x == 0 ? tile_rom_dout[31:24] :
