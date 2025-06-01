@@ -29,7 +29,7 @@ void clear_framebuffer() {
   }
 }
 
-void clear_char_ram() {
+void clear_text() {
   for (uint16_t i = 0; i < 256; i++) {
     CHAR_RAM[i] = 0;
   }
@@ -44,7 +44,7 @@ void write_text(char *s, uint16_t flags, uint8_t col, uint8_t row) {
 }
 
 void start() {
-  clear_char_ram();
+  clear_text();
 
   write_text("HELLO, WORLD!                   \0", TEXT_INVERT, 0, 0);
   write_text("FREQ    RES     ENV     MODE    \0", TEXT_NORMAL, 0, 2);
