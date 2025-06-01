@@ -5,14 +5,14 @@ module gpu (
     input clk,
     input rst,
 
-    // Character RAM
+    // character RAM
     input         char_ram_wr,
     input  [ 1:0] char_ram_mask,
     input  [ 7:0] char_ram_addr,
     input  [15:0] char_ram_data,
     output [15:0] char_ram_q,
 
-    // Framebuffer
+    // framebuffer
     input         framebuffer_wr,
     input  [ 1:0] framebuffer_mask,
     input  [11:0] framebuffer_addr,
@@ -27,12 +27,13 @@ module gpu (
     output [7:0] oled_dout
 );
 
-  wire [ 7:0] framebuffer_q_b;
-  wire [ 7:0] char_ram_addr_b;
+  wire [7:0] framebuffer_q_b;
+  wire [7:0] char_ram_addr_b;
   wire [15:0] char_ram_q_b;
-  wire [ 7:0] char_data;
+  wire [7:0] char_data;
+  wire pixel_re;
   wire [12:0] pixel_addr;
-  wire [ 7:0] pixel_data = framebuffer_q_b | char_data;
+  wire [7:0] pixel_data = framebuffer_q_b | char_data;
 
   framebuffer framebuffer (
       .clk(clk),
@@ -68,6 +69,7 @@ module gpu (
 
   layer_processor char_layer (
       .clk(clk),
+      .en(pixel_re),
       .ram_addr(char_ram_addr_b),
       .ram_data(char_ram_q_b),
       .pixel_addr(pixel_addr),
@@ -77,6 +79,7 @@ module gpu (
   oled oled (
       .clk(clk),
       .rst(rst),
+      .pixel_re(pixel_re),
       .pixel_addr(pixel_addr),
       .pixel_data(pixel_data),
       .oled_cs(oled_cs),

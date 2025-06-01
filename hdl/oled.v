@@ -12,6 +12,7 @@ module oled (
     input rst,
 
     // pixel data
+    output        pixel_re,
     output [12:0] pixel_addr,
     input  [ 7:0] pixel_data,
 
@@ -33,7 +34,6 @@ module oled (
   reg [2:0] state;
   reg [4:0] counter;
   reg [13:0] addr;
-  reg framebuffer_cs;
 
   wire start = state == SEND_COMMAND;
   wire ready;
@@ -41,17 +41,16 @@ module oled (
   wire [7:0] data;
   wire [7:0] rom_q;
 
-  assign pixel_addr = addr[13] ? addr[12:0] : 'h7f;
+  assign pixel_addr = addr[12:0];
   assign oled_cs = state == INIT || state == IDLE;
   assign oled_rst = !rst;
-  assign data = framebuffer_cs ? pixel_data : rom_q;
+  assign pixel_re = addr[13];
+  assign data = pixel_re ? pixel_data : rom_q;
 
   always @(posedge clk, posedge rst) begin
     if (rst) begin
       state <= INIT;
-      framebuffer_cs <= 0;
     end else begin
-      framebuffer_cs <= addr[13];
       case (state)
         INIT: begin
           state   <= SEND_COMMAND;
