@@ -6,6 +6,10 @@
 // Address offset of the first printable ASCII character
 #define ASCII_OFFSET 0x20
 
+// Text flags
+#define TEXT_NORMAL 0x0000
+#define TEXT_INVERT 0x8000
+
 void delay(uint16_t d) {
   for (uint16_t i = 0; i < d; i++) {
     asm("nop");
@@ -31,22 +35,24 @@ void clear_char_ram() {
   }
 }
 
-void write_string(char *s, uint8_t col, uint8_t row) {
+void write_text(char *s, uint16_t flags, uint8_t col, uint8_t row) {
   uint8_t index = (row << 5) + col;
   while (*s != '\0') {
-    CHAR_RAM[index++] = *s++ - ASCII_OFFSET;
+    uint8_t c = *s++ - ASCII_OFFSET;
+    CHAR_RAM[index++] = c | flags;
   }
 }
 
 void start() {
   clear_char_ram();
 
-  write_string("FREQ    RES     ENV     MODE    \0", 0, 2);
-  write_string("1.00    0.01    0.00    LOW PASS\0", 0, 3);
-  write_string("----    ----    ----    ----    \0", 0, 4);
-  write_string("ATK     DEC     SUS     REL     \0", 0, 5);
-  write_string("0.64    1.74    0.34    0.44    \0", 0, 6);
-  write_string("----    ----    ----    ----    \0", 0, 7);
+  write_text("HELLO, WORLD!                   \0", TEXT_INVERT, 0, 0);
+  write_text("FREQ    RES     ENV     MODE    \0", TEXT_NORMAL, 0, 2);
+  write_text("1.00    0.01    0.00    LOW PASS\0", TEXT_NORMAL, 0, 3);
+  write_text("----    ----    ----    ----    \0", TEXT_NORMAL, 0, 4);
+  write_text("ATK     DEC     SUS     REL     \0", TEXT_NORMAL, 0, 5);
+  write_text("0.64    1.74    0.34    0.44    \0", TEXT_NORMAL, 0, 6);
+  write_text("----    ----    ----    ----    \0", TEXT_NORMAL, 0, 7);
 
   while (1) {
     clear_framebuffer();
