@@ -17,22 +17,23 @@ void delay(uint16_t d) {
 }
 
 void start(void) {
-  for (uint16_t *i = CHAR_RAM; i < (uint16_t *)0x4010; i++) {
-    *i = 1;
+  for (uint16_t i = 0; i < 256; i++) {
+    CHAR_RAM[i] = i & 0x3F;
   }
 
   while (1) {
-    for (uint16_t i = 0; i < 8; i++) {
-      for (uint16_t j = 0; j < 2; j++) {
-        uint16_t fb_index = (i << 6) | j;
-        FRAMEBUFFER[fb_index] = 0xFFFF;
+    for (uint16_t row = 0; row < 8; row++) {
+      for (uint16_t col = 0; col < 2; col++) {
+        uint16_t index = (row << 6) | col;
+        FRAMEBUFFER[index] = 0x7777;
       }
     }
 
     delay(65535);
 
-    for (uint16_t *i = FRAMEBUFFER; i < (uint16_t *)0x4000; i++)
-      *i = 0x0000;
+    for (uint16_t i = 0; i < 0x1000; i++) {
+      FRAMEBUFFER[i] = 0;
+    }
 
     delay(65535);
   }
