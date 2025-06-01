@@ -21,16 +21,16 @@ int main(int argc, char **argv) {
 
   while (time < 1000000) {
     dut->rst = time < 4;
-    dut->clk = !dut->clk;
 
     dut->char_ram_wr = i < 64;
     dut->char_ram_addr = i;
-    dut->char_ram_data = i;
+    dut->char_ram_data = 0x20;
     if (dut->clk)
       i++;
 
     dut->eval();
     m_trace->dump(time);
+    dut->clk = !dut->clk;
     time++;
   }
 
