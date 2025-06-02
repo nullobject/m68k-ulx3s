@@ -1,17 +1,18 @@
 [*]
 [*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
-[*] Sun Jun  1 11:20:27 2025
+[*] Sun Jun  1 21:10:11 2025
 [*]
 [dumpfile] "/home/josh/src/ulx3s/m68k-ulx3s/waveform.vcd"
-[dumpfile_mtime] "Sun Jun  1 11:16:11 2025"
-[dumpfile_size] 46132842
+[dumpfile_mtime] "Sun Jun  1 21:10:10 2025"
+[dumpfile_size] 47630319
 [savefile] "/home/josh/src/ulx3s/m68k-ulx3s/oled.gtkw"
-[timestart] 4338
+[timestart] 4347
 [size] 2783 1751
-[pos] -1 -1
-*-2.314123 4360 263 33074 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -843 34
+*-1.714123 4357 263 33074 4357 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [markername] AFRAME
 [markername] BFRAME
+[markername] CBUG
 [treeopen] TOP.
 [treeopen] TOP.gpu.
 [treeopen] TOP.gpu.char_layer.
@@ -36,6 +37,7 @@ TOP.gpu.oled.pixel_addr[12:0]
 TOP.gpu.char_layer.ram_addr[7:0]
 [color] 7
 TOP.gpu.char_layer.ram_data[15:0]
+TOP.gpu.char_layer.tile[15:0]
 TOP.gpu.char_layer.tile_code[5:0]
 TOP.gpu.char_layer.tile_rom_addr[8:0]
 TOP.gpu.char_layer.tile_rom_dout[31:0]

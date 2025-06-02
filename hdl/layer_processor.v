@@ -11,14 +11,13 @@ module layer_processor (
     output [ 7:0] pixel_data
 );
 
-  reg [15:0] tile;
-
   wire [2:0] row = pixel_addr[12:10];
   wire [4:0] col = pixel_addr[6:2];
-
   wire [2:0] offset_y = pixel_addr[9:7];
   wire [1:0] offset_x = pixel_addr[1:0];
 
+  reg [15:0] tile;
+  reg latch_tile;
   wire tile_invert = tile[15];
   wire [5:0] tile_code = tile[5:0];
   wire [8:0] tile_rom_addr = {tile_code, offset_y};
@@ -40,7 +39,8 @@ module layer_processor (
       {row, col + 1'h1};
 
   always @(posedge clk) begin
-    if (offset_x == 3) tile <= ram_data;
+    latch_tile <= offset_x == 3;
+    if (latch_tile) tile <= ram_data;
   end
 
   assign pixel_data = tile_invert ? ~tile_rom_byte : tile_rom_byte;

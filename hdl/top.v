@@ -5,8 +5,8 @@ module top (
   output ftdi_rxd,
   output wifi_gpio0,
   output reg [7:0] led,
-  output reg [7:0] gp,
-  output reg [7:0] gn
+  output [7:0] gp,
+  output [7:0] gn
 );
 
 assign wifi_gpio0 = 1'b1;
