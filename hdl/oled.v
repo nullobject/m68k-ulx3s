@@ -149,6 +149,9 @@ module oled_tx (
     endcase
   endfunction
 
+  // Latching the output data bus on falling clock edge provides better setup
+  // and hold times for the OLED display. It latches data internally on
+  // a falling E signal.
   always @(negedge clk) oled_dout <= data;
 
   always @(posedge clk, posedge rst) begin

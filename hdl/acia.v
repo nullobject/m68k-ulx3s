@@ -1013,4 +1013,3 @@ reg [6:0] clk_divcnt;
   end
 
 endmodule
-
