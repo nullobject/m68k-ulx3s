@@ -7,8 +7,8 @@
 #define ASCII_OFFSET 0x20
 
 // Text flags
-#define TEXT_NORMAL 0x0000
-#define TEXT_INVERT 0x8000
+#define TEXT_NORMAL 0
+#define TEXT_INVERT 8
 
 void delay(uint16_t d) {
   for (uint16_t i = 0; i < d; i++) {
@@ -36,17 +36,17 @@ void clear_text() {
 }
 
 void write_text(char *s, uint16_t flags, uint8_t col, uint8_t row) {
-  uint8_t index = (row << 5) + col;
-  while (*s != '\0') {
-    uint8_t c = *s++ - ASCII_OFFSET;
-    CHAR_RAM[index++] = c | flags;
+  uint8_t i = (row << 5) + col;
+  while (*s) {
+    char c = *s++ - ASCII_OFFSET;
+    CHAR_RAM[i++] = (flags << 12) | c;
   }
 }
 
 void start() {
   clear_text();
 
-  write_text("HELLO, WORLD!                   \0", TEXT_INVERT, 0, 0);
+  write_text("FILTER (1/2)                ++++\0", TEXT_INVERT, 0, 0);
   write_text("FREQ    RES     ENV     MODE    \0", TEXT_NORMAL, 0, 2);
   write_text("1.00    0.01    0.00    LOW PASS\0", TEXT_NORMAL, 0, 3);
   write_text("----    ----    ----    ----    \0", TEXT_NORMAL, 0, 4);
@@ -61,8 +61,8 @@ void start() {
 
     for (uint16_t row = 0; row < 8; row++) {
       for (uint16_t col = 0; col < 2; col++) {
-        uint16_t index = (row << 6) | col;
-        FRAMEBUFFER[index] = 0x7777;
+        uint16_t i = (row << 6) | col;
+        FRAMEBUFFER[i] = 0x7777;
       }
     }
 
