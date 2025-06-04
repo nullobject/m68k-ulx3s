@@ -17,7 +17,6 @@ module top (
   wire [15:0] rom_dout;
   wire [15:0] ram_dout;
   wire [15:0] char_ram_dout;
-  wire [15:0] framebuffer_dout;
   wire [ 7:0] acia_dout;
 
   wire cpu_rw;    // read = 1, write = 0
@@ -35,19 +34,17 @@ module top (
   //
   // 0000-0FFF ROM
   // 1000-1FFF RAM
-  // 2000-3FFF FRAMEBUFFER
-  // 4000-4100 CHAR RAM
-  // 5000      ACIA
-  // 6000      LED
+  // 2000-2100 CHAR RAM
+  // 3000      ACIA
+  // 4000      LED
   always @(addr) begin
-    {ram_cs, char_ram_cs, framebuffer_cs, acia_cs, led_cs} = 0;
+    {ram_cs, char_ram_cs, acia_cs, led_cs} = 0;
     casez (cpu_addr[15:12])
       4'b0001: ram_cs = 1;
-      4'b001?: framebuffer_cs = 1;
-      4'b0100: char_ram_cs = 1;
-      4'b0101: acia_cs = 1;
-      4'b0110: led_cs = 1;
-      default: {ram_cs, char_ram_cs, framebuffer_cs, acia_cs, led_cs} = 0;
+      4'b0010: char_ram_cs = 1;
+      4'b0011: acia_cs = 1;
+      4'b0100: led_cs = 1;
+      default: {ram_cs, char_ram_cs, acia_cs, led_cs} = 0;
     endcase
   end
 
@@ -86,7 +83,6 @@ module top (
   // decode CPU input data bus
   assign cpu_din =
   acia_cs ? {acia_dout, 8'h0} :
-  framebuffer_cs ? framebuffer_dout :
   char_ram_cs ? char_ram_dout :
   ram_cs ? ram_dout :
   rom_dout;
@@ -178,11 +174,6 @@ module top (
       .char_ram_addr(cpu_addr[8:1]),
       .char_ram_data(cpu_dout),
       .char_ram_q(char_ram_dout),
-      .framebuffer_wr(framebuffer_cs && !cpu_rw),
-      .framebuffer_mask({!cpu_uds_n, !cpu_lds_n}),
-      .framebuffer_addr(cpu_addr[12:1]),
-      .framebuffer_data(cpu_dout),
-      .framebuffer_q(framebuffer_dout),
       .oled_cs(gp[0]),
       .oled_rst(gp[1]),
       .oled_dc(gp[3]),

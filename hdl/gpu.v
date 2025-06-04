@@ -1,5 +1,5 @@
 /**
- * Renders primitives to a framebuffer.
+ * Renders tilemap layers.
  */
 module gpu (
     input clk,
@@ -12,13 +12,6 @@ module gpu (
     input  [15:0] char_ram_data,
     output [15:0] char_ram_q,
 
-    // framebuffer
-    input         framebuffer_wr,
-    input  [ 1:0] framebuffer_mask,
-    input  [11:0] framebuffer_addr,
-    input  [15:0] framebuffer_data,
-    output [15:0] framebuffer_q,
-
     // OLED
     output       oled_cs,
     output       oled_rst,
@@ -27,28 +20,12 @@ module gpu (
     output [7:0] oled_dout
 );
 
-  wire [7:0] framebuffer_q_b;
   wire [7:0] char_ram_addr_b;
   wire [15:0] char_ram_q_b;
   wire [7:0] char_data;
   wire pixel_re;
   wire [12:0] pixel_addr;
-  wire [7:0] pixel_data = framebuffer_q_b | char_data;
-
-  framebuffer framebuffer (
-      .clk(clk),
-
-      // port A
-      .wr_a(framebuffer_wr),
-      .mask_a(framebuffer_mask),
-      .addr_a(framebuffer_addr),
-      .data_a(framebuffer_data),
-      .q_a(framebuffer_q),
-
-      // port B
-      .addr_b(pixel_addr),
-      .q_b(framebuffer_q_b)
-  );
+  wire [7:0] pixel_data = char_data;
 
   dual_port_ram #(
       .DEPTH(256)

@@ -1,7 +1,6 @@
 #include <stdint.h>
 
-#define FRAMEBUFFER ((uint16_t *)0x2000)
-#define CHAR_RAM ((uint16_t *)0x4000)
+#define CHAR_RAM ((uint16_t *)0x2000)
 
 // Address offset of the first printable ASCII character
 #define ASCII_OFFSET 0x20
@@ -20,12 +19,6 @@ void delay(uint16_t d) {
     asm("nop");
     asm("nop");
     asm("nop");
-  }
-}
-
-void clear_framebuffer() {
-  for (uint16_t i = 0; i < 4096; i++) {
-    FRAMEBUFFER[i] = 0;
   }
 }
 
@@ -55,17 +48,6 @@ void start() {
   write_text("----    ----    ----    ----    \0", TEXT_NORMAL, 0, 7);
 
   while (1) {
-    clear_framebuffer();
-
-    delay(65535);
-
-    for (uint16_t row = 0; row < 8; row++) {
-      for (uint16_t col = 0; col < 2; col++) {
-        uint16_t i = (row << 6) | col;
-        FRAMEBUFFER[i] = 0x7777;
-      }
-    }
-
     delay(65535);
   }
 }
