@@ -49,9 +49,9 @@ module top (
   end
 
   // reset
-  reg rst_n = 0;
-
-  always @(posedge clk_25mhz) rst_n <= btn[0];
+  reg [5:0] reset_cnt = 0;
+  wire rst_n = &reset_cnt & btn[0];
+  always @(posedge clk_25mhz) reset_cnt <= reset_cnt + !rst_n;
 
   // DTACK
   reg dtack_n;  // Data transfer ack (always ready)
