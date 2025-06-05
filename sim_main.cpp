@@ -15,14 +15,13 @@ int main(int argc, char **argv) {
   vluint64_t time = 0;
 
   dut->clk = 0;
-  dut->char_ram_mask = 3;
 
   int i = 0;
 
   while (time < 1000000) {
-    dut->rst = time < 4;
+    dut->rst_n = time >= 4;
 
-    dut->char_ram_wr = i < 64;
+    dut->char_ram_we = i < 64 ? 0b11 : 0b00;
     dut->char_ram_addr = i;
     dut->char_ram_data = 0x20 | (i < 32 ? 0x8000 : 0);
     if (dut->clk)
