@@ -3,22 +3,18 @@ module ram #(
     parameter ADDRESS_WIDTH = $clog2(DEPTH)
 ) (
     input clk,
-    input we,
-    input [1:0] mask,
+    input [1:0] we,
     input [ADDRESS_WIDTH-1:0] addr,
     input [15:0] din,
     output reg [15:0] dout
 );
 
-  reg [7:0] ram_hi[0:DEPTH-1];
-  reg [7:0] ram_lo[0:DEPTH-1];
+  reg [15:0] mem[0:DEPTH-1];
 
   always @(posedge clk) begin
-    if (we) begin
-      if (mask[1]) ram_hi[addr] <= din[15:8];
-      if (mask[0]) ram_lo[addr] <= din[7:0];
-    end
-    dout <= {ram_hi[addr], ram_lo[addr]};
+    dout <= mem[addr];
+    if (we[0]) mem[addr][7:0] <= din[7:0];
+    if (we[1]) mem[addr][15:8] <= din[15:8];
   end
 
 endmodule

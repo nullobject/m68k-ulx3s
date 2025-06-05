@@ -139,8 +139,7 @@ module top (
       .DEPTH(2048)
   ) work_ram (
       .clk (clk_25mhz),
-      .we  (ram_cs && !cpu_rw),
-      .mask({!cpu_uds_n, !cpu_lds_n}),
+      .we  (ram_cs && !cpu_rw ? {!cpu_uds_n, !cpu_lds_n} : 0),
       .addr(cpu_addr[11:1]),
       .din (cpu_dout),
       .dout(ram_dout)
@@ -169,8 +168,7 @@ module top (
   gpu gpu (
       .clk(clk_25mhz),
       .rst_n(rst_n),
-      .char_ram_wr(char_ram_cs && !cpu_rw),
-      .char_ram_mask({!cpu_uds_n, !cpu_lds_n}),
+      .char_ram_we(char_ram_cs && !cpu_rw ? {!cpu_uds_n, !cpu_lds_n} : 0),
       .char_ram_addr(cpu_addr[8:1]),
       .char_ram_data(cpu_dout),
       .char_ram_q(char_ram_dout),

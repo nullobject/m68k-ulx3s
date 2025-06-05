@@ -6,8 +6,7 @@ module gpu (
     input rst_n,
 
     // character RAM
-    input         char_ram_wr,
-    input  [ 1:0] char_ram_mask,
+    input  [ 1:0] char_ram_we,
     input  [ 7:0] char_ram_addr,
     input  [15:0] char_ram_data,
     output [15:0] char_ram_q,
@@ -33,8 +32,7 @@ module gpu (
       .clk(clk),
 
       // port A
-      .wr_a(char_ram_wr),
-      .mask_a(char_ram_mask),
+      .we_a(char_ram_we),
       .addr_a(char_ram_addr),
       .data_a(char_ram_data),
       .q_a(char_ram_q),
