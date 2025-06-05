@@ -97,9 +97,9 @@ module oled (
       .DEPTH(64),
       .DATA_WIDTH(8)
   ) oled_rom (
-      .clk (clk),
+      .clk(clk),
       .addr(addr[5:0]),
-      .dout(rom_q)
+      .q(rom_q)
   );
 
 endmodule

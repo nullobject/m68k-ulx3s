@@ -50,9 +50,9 @@ module layer_processor (
       .DEPTH(512),
       .DATA_WIDTH(32)
   ) tile_rom (
-      .clk (clk),
+      .clk(clk),
       .addr(tile_rom_addr),
-      .dout(tile_rom_dout)
+      .q(tile_rom_dout)
   );
 
 endmodule

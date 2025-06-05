@@ -129,20 +129,20 @@ module top (
       .MEM_INIT_FILE("build/rom.hex"),
       .DEPTH(2048)
   ) prog_rom (
-      .clk (clk_25mhz),
+      .clk(clk_25mhz),
       .addr(cpu_addr[11:1]),
-      .dout(rom_dout)
+      .q(rom_dout)
   );
 
   // RAM
   ram #(
       .DEPTH(2048)
   ) work_ram (
-      .clk (clk_25mhz),
-      .we  (ram_cs && !cpu_rw ? {!cpu_uds_n, !cpu_lds_n} : 0),
+      .clk(clk_25mhz),
+      .we(ram_cs && !cpu_rw ? {!cpu_uds_n, !cpu_lds_n} : 0),
       .addr(cpu_addr[11:1]),
-      .din (cpu_dout),
-      .dout(ram_dout)
+      .data(cpu_dout),
+      .q(ram_dout)
   );
 
   // UART

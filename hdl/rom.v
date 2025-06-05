@@ -6,7 +6,7 @@ module rom #(
 ) (
     input clk,
     input [ADDRESS_WIDTH-1:0] addr,
-    output reg [DATA_WIDTH-1:0] dout
+    output reg [DATA_WIDTH-1:0] q
 );
 
   reg [DATA_WIDTH-1:0] rom[0:DEPTH-1];
@@ -14,7 +14,7 @@ module rom #(
   initial if (MEM_INIT_FILE != "") $readmemh(MEM_INIT_FILE, rom);
 
   always @(posedge clk) begin
-    dout <= rom[addr];
+    q <= rom[addr];
   end
 
 endmodule
