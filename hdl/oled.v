@@ -9,7 +9,7 @@
  */
 module oled (
     input clk,
-    input rst,
+    input rst_n,
 
     // pixel data
     output        pixel_re,
@@ -43,12 +43,12 @@ module oled (
 
   assign pixel_addr = addr[12:0];
   assign oled_cs = state == INIT || state == IDLE;
-  assign oled_rst = !rst;
+  assign oled_rst = rst_n;
   assign pixel_re = addr[13];
   assign data = pixel_re ? pixel_data : rom_q;
 
-  always @(posedge clk, posedge rst) begin
-    if (rst) begin
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
       state <= INIT;
     end else begin
       case (state)
@@ -81,7 +81,7 @@ module oled (
 
   oled_tx oled_tx (
       .clk(clk),
-      .rst(rst),
+      .rst_n(rst_n),
       .start(start),
       .ready(ready),
       .next(next),
@@ -106,7 +106,7 @@ endmodule
 
 module oled_tx (
     input clk,
-    input rst,
+    input rst_n,
 
     // control signals
     input  start,
@@ -154,8 +154,8 @@ module oled_tx (
   // a falling E signal.
   always @(negedge clk) oled_dout <= data;
 
-  always @(posedge clk, posedge rst) begin
-    if (rst) begin
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
       state   <= IDLE;
       oled_dc <= 0;
       oled_e  <= 1;

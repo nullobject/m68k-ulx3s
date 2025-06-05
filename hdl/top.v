@@ -168,7 +168,7 @@ module top (
   // GPU
   gpu gpu (
       .clk(clk_25mhz),
-      .rst(!rst_n),
+      .rst_n(rst_n),
       .char_ram_wr(char_ram_cs && !cpu_rw),
       .char_ram_mask({!cpu_uds_n, !cpu_lds_n}),
       .char_ram_addr(cpu_addr[8:1]),

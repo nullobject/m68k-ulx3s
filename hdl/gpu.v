@@ -3,7 +3,7 @@
  */
 module gpu (
     input clk,
-    input rst,
+    input rst_n,
 
     // character RAM
     input         char_ram_wr,
@@ -55,7 +55,7 @@ module gpu (
 
   oled oled (
       .clk(clk),
-      .rst(rst),
+      .rst_n(rst_n),
       .pixel_re(pixel_re),
       .pixel_addr(pixel_addr),
       .pixel_data(pixel_data),
