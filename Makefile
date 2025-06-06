@@ -4,8 +4,6 @@ BUILDDIR = build
 
 PROG = display
 PROG_C = rom/$(PROG).c
-PROG_O = $(BUILDDIR)/$(PROG).o
-PROG_OUT = $(BUILDDIR)/$(PROG).out
 PROG_BIN = $(BUILDDIR)/$(PROG).bin
 PROG_HEX = $(BUILDDIR)/$(PROG).hex
 FAKE_HEX = $(BUILDDIR)/rom.hex
