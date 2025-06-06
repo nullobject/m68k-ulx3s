@@ -27,24 +27,24 @@ module top (
   wire vma_n;     // valid memory address
   wire vpa_n;     // valid peripheral address
 
-  // address 0x4000 to 0xffff used for peripherals
-  assign vpa_n = !(cpu_addr[15:12] >= 5) | cpu_as_n;
+  // address 0x3000 to 0xffff used for peripherals
+  assign vpa_n = !(cpu_addr[15:12] >= 3) | cpu_as_n;
 
   // chip select
   //
   // 0000-0FFF ROM
   // 1000-1FFF RAM
   // 2000-2100 CHAR RAM
-  // 3000      ACIA
-  // 4000      LED
+  // 3000      LED
+  // 4000      ACIA
   always @(addr) begin
-    {ram_cs, char_ram_cs, acia_cs, led_cs} = 0;
+    {ram_cs, char_ram_cs, led_cs, acia_cs} = 0;
     casez (cpu_addr[15:12])
       4'b0001: ram_cs = 1;
       4'b0010: char_ram_cs = 1;
-      4'b0011: acia_cs = 1;
-      4'b0100: led_cs = 1;
-      default: {ram_cs, char_ram_cs, acia_cs, led_cs} = 0;
+      4'b0011: led_cs = 1;
+      4'b0100: acia_cs = 1;
+      default: {ram_cs, char_ram_cs, led_cs, acia_cs} = 0;
     endcase
   end
 
@@ -87,6 +87,7 @@ module top (
   ram_cs ? ram_dout :
   rom_dout;
 
+  // CPU
   fx68k m68k (
       // clock/reset
       .clk(clk_25mhz),
