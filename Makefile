@@ -2,6 +2,9 @@ DEVICE = 85k
 PIN_DEF = ulx3s_v20.lpf
 BUILDDIR = build
 
+CC = m68k-linux-gnu-gcc
+OBJCOPY = m68k-linux-gnu-objcopy
+
 PROG = display
 PROG_OUT = $(BUILDDIR)/$(PROG).out
 PROG_BIN = $(BUILDDIR)/$(PROG).bin
@@ -35,13 +38,13 @@ $(FAKE_HEX):
 
 $(PROG_OUT): rom/$(PROG).c rom/start.s rom/linker_script.ld
 	mkdir -p $(BUILDDIR)
-	m68k-linux-gnu-gcc -Wall -ffreestanding -nostdlib -Wl,-Bstatic,-Trom/linker_script.ld,--strip-debug,--build-id=none,--no-warn-execstack -o $@ rom/start.s $<
+	$(CC) -Wall -ffreestanding -nostdlib -Wl,-Bstatic,-Trom/linker_script.ld,--strip-debug,--build-id=none,--no-warn-execstack -o $@ rom/start.s $<
 
 $(PROG_BIN): $(PROG_OUT)
-	m68k-linux-gnu-objcopy -O binary $< $@
+	$(OBJCOPY) -O binary $< $@
 
 $(PROG_HEX): $(PROG_OUT)
-	m68k-linux-gnu-objcopy -O verilog --verilog-data-width=2 $< $@
+	$(OBJCOPY) -O verilog --verilog-data-width=2 $< $@
 
 $(BUILDDIR)/%.json: $(SRC) $(FAKE_HEX)
 	yosys -p "synth_ecp5 -abc9 -top top -json $@" $(SRC)
