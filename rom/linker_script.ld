@@ -1,20 +1,39 @@
 MEMORY
 {
-  rom_vectors (rx) : ORIGIN = 0x00, LENGTH = 0x0010
-  rom_code    (rx) : ORIGIN = 0x10, LENGTH = 0x1000
+  rom (rx)  : ORIGIN = 0x0000, LENGTH = 0x1000
+  ram (rwx) : ORIGIN = 0x1000, LENGTH = 0x1000
 }
 
 SECTIONS
 {
-  .text.startup :
-  {
-    *(.text.startup)
-  } > rom_vectors
-
   .text :
   {
-    *(.text)
-  } > rom_code
-}
+    KEEP(*(.vectors .vectors.*))
+    . = ALIGN(2);
+    _stext = .;
+    *(.text .text.*)
+    *(.rodata .rodata.*)
+    . = ALIGN(2);
+    _etext = .;
+  } > rom
 
-OUTPUT_FORMAT(binary)
+  .data :
+  {
+    . = ALIGN(2);
+    _sdata = .;
+    *(.data .data.*)
+    *(.sdata .sdata.*)
+    . = ALIGN(2);
+    _edata = .;
+  } > ram AT> rom
+
+  .bss :
+  {
+    . = ALIGN(2);
+    _sbss = .;
+    *(.bss .bss.*)
+    *(COMMON)
+    . = ALIGN(2);
+    _ebss = .;
+  } > ram
+}
