@@ -2,7 +2,7 @@ DEVICE = 85k
 PIN_DEF = ulx3s_v20.lpf
 BUILDDIR = build
 
-PROG = blink
+PROG = display
 PROG_OUT = $(BUILDDIR)/$(PROG).out
 PROG_BIN = $(BUILDDIR)/$(PROG).bin
 PROG_HEX = $(BUILDDIR)/$(PROG).hex

@@ -1,4 +1,3 @@
-#include <limits.h>
 #include <stdint.h>
 
 // #define LED ((uint8_t *)0x3000)
@@ -17,6 +16,4 @@ int __attribute__((noreturn)) main() {
     *LED = 0x00;
     delay(65535);
   }
-
-  __builtin_unreachable();
 }

@@ -27,7 +27,7 @@ void cout(char *a) {
   }
 }
 
-int __attribute__((noreturn)) main(void) {
+int __attribute__((noreturn)) main() {
   char *line = "hello world!\n\r";
   char c = 0;
 
@@ -38,6 +38,4 @@ int __attribute__((noreturn)) main(void) {
     cout(line);
     delay(65535);
   }
-
-  __builtin_unreachable();
 }
